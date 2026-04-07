@@ -1,0 +1,16 @@
+{
+  "name": "cli-dev",
+  "version": "1.0.0",
+  "description": "Skills for designing and reviewing agent-friendly CLI tools",
+  "author": {
+    "name": "mexcool"
+  },
+  "license": "MIT",
+  "keywords": [
+    "axi",
+    "cli",
+    "agent-tools",
+    "token-efficiency",
+    "toon"
+  ]
+}

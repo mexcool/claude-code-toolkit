@@ -1,0 +1,16 @@
+{
+  "name": "pastila",
+  "description": "Create encrypted, shareable links using pastila.nl - an end-to-end encrypted pastebin by ClickHouse.",
+  "version": "1.0.0",
+  "author": {
+    "name": "mexcool"
+  },
+  "license": "MIT",
+  "keywords": [
+    "pastebin",
+    "encryption",
+    "sharing",
+    "pastila",
+    "clickhouse"
+  ]
+}

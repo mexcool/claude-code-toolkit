@@ -1,0 +1,10 @@
+{
+  "name": "obsidian-helper",
+  "version": "1.0.0",
+  "description": "Session notes and task tracking in the Obsidian work vault",
+  "author": {
+    "name": "mexcool"
+  },
+  "license": "MIT",
+  "keywords": ["obsidian", "session-notes", "task-tracking"]
+}

@@ -1,0 +1,28 @@
+{
+  "name": "claude-code-toolkit",
+  "owner": {
+    "name": "mexcool"
+  },
+  "plugins": [
+    {
+      "name": "claude-dev-tools",
+      "source": "./plugins/claude-dev-tools",
+      "description": "Various helper tools for Claude Code development"
+    },
+    {
+      "name": "pastila",
+      "source": "./plugins/pastila",
+      "description": "Create encrypted, shareable links using pastila.nl - an end-to-end encrypted pastebin by ClickHouse"
+    },
+    {
+      "name": "obsidian-helper",
+      "source": "./plugins/obsidian-helper",
+      "description": "Session notes and task tracking in the Obsidian work vault"
+    },
+    {
+      "name": "cli-dev",
+      "source": "./plugins/cli-dev",
+      "description": "Skills for designing and reviewing agent-friendly CLI tools"
+    }
+  ]
+}
