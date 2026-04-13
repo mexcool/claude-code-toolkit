@@ -23,6 +23,17 @@ A collection of Claude Code plugins for enhanced development workflows.
 
 Or use the interactive `/plugin` command to browse and install.
 
+## Adding a Skill to an Existing Plugin
+
+Skills are discovered automatically by directory convention — no JSON registration needed.
+
+1. Create `plugins/<plugin-name>/skills/<skill-name>/SKILL.md`
+2. Bump the `version` in `plugins/<plugin-name>/.claude-plugin/plugin.json` so the plugin system re-caches
+3. Document the skill in `CLAUDE.md` under the plugin's section
+4. Run `/reload-plugins` (or `/plugin` to update)
+
+If the skill needs hooks (e.g., triggering on `PreToolUse`/`PostToolUse`), also add entries to the plugin's `hooks/hooks.json`.
+
 ## Adding New Plugins
 
 1. Create a new directory under `plugins/`:
