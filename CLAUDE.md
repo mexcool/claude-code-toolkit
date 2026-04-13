@@ -49,6 +49,13 @@ Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse's e
 
 ## Plugin Development
 
+When adding a new skill to an existing plugin:
+
+1. Create `plugins/<name>/skills/<skill-name>/SKILL.md`
+2. Bump `version` in `plugins/<name>/.claude-plugin/plugin.json` so the plugin system re-caches
+3. Document the skill in this file under the plugin's section
+4. Run `/reload-plugins` (or `/plugin` to update)
+
 When adding a new plugin:
 
 1. Create directory structure under `plugins/<name>/`
