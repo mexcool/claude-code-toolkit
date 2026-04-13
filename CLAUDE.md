@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Public Repository
+
+This is a **public open-source repo**. All content is visible to anyone. Follow these practices:
+- Never commit secrets, API keys, tokens, or credentials
+- Use generic examples (e.g., `PROJ-123`) — no internal project names, team prefixes, or real ticket IDs
+- No internal URLs, Slack channels, employee names, or company-specific references
+- Review diffs before committing for accidental leaks
+
 ## Project Overview
 
 This is a Claude Code plugin marketplace containing reusable plugins for enhanced development workflows. Plugins provide skills, hooks, commands, and agents that extend Claude Code's functionality.
@@ -23,11 +31,15 @@ plugins/
 
 ### claude-dev-tools
 
-Context optimization and continuous learning tools:
+Context optimization, continuous learning, and agent orchestration tools:
 
 - **strategic-compact**: Suggests manual `/compact` at logical task boundaries instead of arbitrary auto-compaction. Triggers on Edit/Write tool use after configurable threshold (default: 50 tool calls).
 
 - **continuous-learning-v2**: Instinct-based learning system that observes sessions via PreToolUse/PostToolUse hooks and creates atomic "instincts" with confidence scoring. Instincts can evolve into full skills/commands/agents.
+
+- **cmux**: Reference for spawning and coordinating teams of agents in cmux panes. Covers Agent Teams (TeamCreate/SendMessage) for Claude Code agents, and generic cmux commands for other tools (Codex, Cursor CLI).
+
+- **orchestrate-implementation**: Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns agents in worktrees, monitors progress, relays answers, and cleans up.
 
 ### pastila
 
