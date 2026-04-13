@@ -1,6 +1,6 @@
 # claude-dev-tools
 
-Context optimization and continuous learning tools for Claude Code development.
+Context optimization, continuous learning, and agent orchestration tools for Claude Code development.
 
 ## Skills
 
@@ -21,6 +21,14 @@ Instinct-based learning system that observes your sessions and creates atomic "i
 - `/evolve` - Cluster related instincts into skills/commands/agents
 - `/instinct-export` - Export instincts for sharing
 - `/instinct-import <file>` - Import instincts from others
+
+### cmux
+
+Reference for spawning and coordinating teams of agents in cmux panes. Covers Agent Teams (TeamCreate/SendMessage) for Claude Code agents, and generic cmux commands for other tools (Codex, Cursor CLI).
+
+### orchestrate-implementation
+
+Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns Opus (latest) agents in worktrees, monitors progress, relays answers, and cleans up.
 
 ## Installation
 
