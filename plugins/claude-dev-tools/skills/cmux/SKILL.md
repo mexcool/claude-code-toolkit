@@ -128,3 +128,22 @@ cmux wait-for --signal [task]-done
 # manually read progress if wait-for failed to return a signal after timeout
 cmux read-screen --surface surface:N --scrollback --lines 200
 ```
+
+### Spawning Claude Code in a Pane — Gotchas
+
+When spawning a fresh `claude` (not via Agent Teams) to operate in a specific
+working directory:
+
+- **Send `cd` and the launch command as separate `cmux send` calls.** Chaining
+  with `&&` through `cmux send "cd <path> && cc-d"` is fragile across quoting;
+  two sequential sends + Enter each is reliable.
+- **Aliases like `cc-d` may not resolve.** The pane's shell often skips
+  interactive rcfiles, so `cc-d` errors with "claude not found in PATH". Use
+  the absolute path: `/Users/<user>/.local/bin/claude --dangerously-skip-permissions`
+  (or whatever `which claude` reports in your normal shell).
+- **`direnv allow` first if the target dir has an `.envrc`.** Worktrees and
+  fresh checkouts need the env approved before `claude` inherits required
+  vars (API keys, project ids); `direnv: error <path>/.envrc is blocked` in
+  the screen output is the tell.
+- **Verify with `cmux read-screen` after launch.** Check the bottom status line
+  shows the expected branch / dir before sending the kickoff prompt.
