@@ -1,0 +1,9 @@
+{
+  "name": "gist",
+  "description": "Guidelines for using GitHub Gists as a pastebin. Covers conventions for creating, sharing, and consuming gists via gh CLI.",
+  "version": "1.0.0",
+  "author": {
+    "name": "asier"
+  },
+  "keywords": ["github", "gists", "pastebin", "paste"]
+}

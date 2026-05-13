@@ -23,6 +23,11 @@
       "name": "cli-dev",
       "source": "./plugins/cli-dev",
       "description": "Skills for designing and reviewing agent-friendly CLI tools"
+    },
+    {
+      "name": "gist",
+      "source": "./plugins/gist",
+      "description": "Guidelines for using GitHub Gists as an internal pastebin. Covers conventions for creating, sharing, and consuming gists via gh CLI."
     }
   ]
 }
