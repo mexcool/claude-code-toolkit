@@ -19,4 +19,4 @@ The user gave you a ticket (ID or URL). Build a full picture before touching any
    - Current state of the system relative to that ask.
    - What needs to happen, in what order.
    - Anything ambiguous or under-specified.
-7. **Ask clarifying questions** before proceeding. If scope is clear, propose a plan and wait for the user's go-ahead.
+7. Make sure you have a complete understanding and ask any clarifying questions if needed.
