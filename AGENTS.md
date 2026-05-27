@@ -41,6 +41,13 @@ Context optimization, continuous learning, and agent orchestration tools:
 
 - **orchestrate-implementation**: Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns agents in worktrees, monitors progress, relays answers, and cleans up.
 
+### prompts
+
+Reusable starter prompts as skills — encode the boilerplate you'd otherwise paste at the start of every session:
+
+- **`/pr-review <PR>`**: Principal-engineer PR review with cross-repo, cross-PR context. Skips nitpicks; flags over-engineering in both the PR and proposed fixes.
+- **`/ticket-kickoff <ID>`**: Gather full context on a ticket (parent/related/blocked-by, multi-repo code, recent PRs) and summarize before writing any code.
+
 ### pastila
 
 Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse's encrypted pastebin):

@@ -1,0 +1,16 @@
+{
+  "name": "prompts",
+  "version": "0.1.0",
+  "description": "Reusable starter prompts as skills — encode the boilerplate you'd otherwise paste at the start of every session",
+  "author": {
+    "name": "mexcool"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "prompts",
+    "workflow",
+    "pr-review",
+    "ticket"
+  ]
+}
