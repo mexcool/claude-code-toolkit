@@ -28,6 +28,11 @@
       "name": "gist",
       "source": "./plugins/gist",
       "description": "Guidelines for using GitHub Gists as an internal pastebin. Covers conventions for creating, sharing, and consuming gists via gh CLI."
+    },
+    {
+      "name": "prompts",
+      "source": "./plugins/prompts",
+      "description": "Reusable starter prompts as skills (pr-review, ticket-kickoff) — encode the boilerplate you'd otherwise paste at the start of every session."
     }
   ]
 }
