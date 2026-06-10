@@ -30,6 +30,17 @@ Reference for spawning and coordinating teams of agents in cmux panes. Covers Ag
 
 Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns Opus (latest) agents in worktrees, monitors progress, relays answers, and cleans up.
 
+### claude-limits
+
+Shows your real Claude plan usage limits — session (5-hour), weekly, per-model weekly, and monthly extra-usage windows — by reading the locally stored OAuth token and calling the usage endpoint. Unlike log-based cost tools, this reports actual plan-limit percentages, not estimates.
+
+```bash
+uv run skills/claude-limits/scripts/claude-limits.py          # table
+uv run skills/claude-limits/scripts/claude-limits.py --json   # raw response
+```
+
+Subscription auth only (Pro/Max/Team); not applicable under Bedrock or a raw API key.
+
 ## Installation
 
 Add to your Claude Code settings:

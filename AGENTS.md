@@ -41,6 +41,8 @@ Context optimization, continuous learning, and agent orchestration tools:
 
 - **orchestrate-implementation**: Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns agents in worktrees, monitors progress, relays answers, and cleans up.
 
+- **claude-limits**: Shows real Claude plan usage limits (session/weekly/per-model/monthly extra-usage) by reading the local OAuth token and calling the `/api/oauth/usage` endpoint. Reports actual plan-limit percentages, not log-based estimates. Subscription auth only — not applicable under Bedrock or a raw API key.
+
 ### prompts
 
 Reusable starter prompts as skills — encode the boilerplate you'd otherwise paste at the start of every session:
