@@ -1,7 +1,7 @@
 ---
 name: claude-limits
 description: "Check your Claude plan usage limits — session (5-hour), weekly, per-model weekly, and monthly extra-usage windows with how close each is to its ceiling. Use when asked about usage limits, rate limits, quota, or how much of the plan is left."
-version: 0.1.0
+version: 0.1.1
 ---
 
 # Claude Usage Limits
@@ -13,11 +13,18 @@ calling the usage endpoint directly.
 Unlike log-based cost tools (e.g. ccusage, or the `session-cost` skill), this
 reports **actual plan limits**, not token-cost estimates.
 
+> **Presenting the result:** show the script's rendered table verbatim in a
+> fenced code block — the bars and layout are the point, so don't summarize the
+> numbers into prose. When capturing output for display in chat, run it
+> *without* `--color` (ANSI escapes render as noise in markdown); `--color` is
+> for the user's own terminal or a statusline.
+
 ## Usage
 
 ```bash
 uv run ${CLAUDE_PLUGIN_ROOT}/skills/claude-limits/scripts/claude-limits.py          # table
 uv run ${CLAUDE_PLUGIN_ROOT}/skills/claude-limits/scripts/claude-limits.py --json   # raw response
+uv run ${CLAUDE_PLUGIN_ROOT}/skills/claude-limits/scripts/claude-limits.py --color  # force ANSI color (statusline / piped)
 ```
 
 Example output (illustrative values):

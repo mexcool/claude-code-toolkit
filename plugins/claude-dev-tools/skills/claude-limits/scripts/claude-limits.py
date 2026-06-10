@@ -203,7 +203,16 @@ def render(data: dict, oauth: dict) -> None:
 @app.command()
 def main(
     as_json: bool = typer.Option(False, "--json", help="Print the raw endpoint response as JSON."),
+    color: bool = typer.Option(
+        False,
+        "--color",
+        help="Force colored output even when piped to a non-TTY (e.g. statusline). "
+        "rich also honors the FORCE_COLOR / NO_COLOR env vars.",
+    ),
 ) -> None:
+    if color:
+        global console
+        console = Console(force_terminal=True)
     oauth = load_oauth()
     token = oauth.get("accessToken")
     if not token:
