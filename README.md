@@ -10,6 +10,7 @@ A collection of Claude Code plugins for enhanced development workflows.
 | [cli-dev](./plugins/cli-dev) | Skills for designing and reviewing agent-friendly CLI tools |
 | [obsidian-helper](./plugins/obsidian-helper) | Session notes and task tracking in Obsidian |
 | [pastila](./plugins/pastila) | Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse) |
+| [ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior-dev mode — YAGNI, stdlib first, no unrequested abstractions (third-party, referenced) |
 
 ## Installation
 
@@ -69,3 +70,4 @@ plugins/
 - `cli-dev:axi` is from [kunchenguid/axi](https://github.com/kunchenguid/axi) by Kun Cheng, licensed under MIT.
 - `cli-dev:cursor-cli-dev` is from [cursor/plugins](https://github.com/cursor/plugins/blob/main/cli-for-agent/skills/cli-for-agents/SKILL.md) by Cursor.
 - `obsidian-helper` is inspired by [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) by Steph Ango (Obsidian).
+- `ponytail` is [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) by Dietrich Gebert, licensed under MIT. This marketplace references it via a pinned `github` source (v4.5.0) — no code is copied into this repo.

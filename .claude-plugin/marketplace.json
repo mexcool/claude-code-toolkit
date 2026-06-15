@@ -33,6 +33,16 @@
       "name": "prompts",
       "source": "./plugins/prompts",
       "description": "Reusable starter prompts as skills (pr-review, ticket-kickoff) — encode the boilerplate you'd otherwise paste at the start of every session."
+    },
+    {
+      "name": "ponytail",
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail",
+        "ref": "v4.5.0",
+        "sha": "60a75f8159de451320055afb2e0796b3fea636f6"
+      },
+      "description": "Lazy senior-dev mode — forces the simplest solution that works (YAGNI, stdlib first, no unrequested abstractions). Adds the /ponytail intensity toggle plus /ponytail-review, /ponytail-audit, /ponytail-debt. Pinned to v4.5.0; sourced from DietrichGebert/ponytail (MIT)."
     }
   ]
 }

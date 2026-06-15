@@ -56,6 +56,10 @@ Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse's e
 
 - **`/pastila` command**: Upload text, files, or conversation context to get shareable end-to-end encrypted URLs. Also supports decrypting existing pastila URLs. Uses AES-GCM encryption matching the web interface.
 
+### ponytail (third-party, referenced)
+
+Not authored here — referenced via a `github` source in `marketplace.json` pinned to `v4.5.0` (sha `60a75f8`); no code is vendored. Bump the `ref`/`sha` to update. Lazy senior-dev mode (YAGNI, stdlib first). Credit + commands: [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail).
+
 ## Plugin Development
 
 When adding a new skill to an existing plugin:
