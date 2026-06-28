@@ -1,6 +1,6 @@
-# CLAUDE.md
+# Agent guidance
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file guides any coding agent working in this repository. It is read as `AGENTS.md` by Codex and as `CLAUDE.md` by Claude Code (same file — `CLAUDE.md` is a symlink).
 
 ## Public Repository
 
@@ -14,10 +14,13 @@ This is a **public open-source repo**. All content is visible to anyone. Follow 
 
 This is a Claude Code plugin marketplace containing reusable plugins for enhanced development workflows. Plugins provide skills, hooks, commands, and agents that extend Claude Code's functionality.
 
+The plugins are authored for Claude Code, but the **agent-agnostic skills** (CLI design, gist, PR/ticket prompts) are also consumable by **Codex**, which reads skills from `$CODEX_HOME/skills`. `install-codex.sh` symlinks those skills there — one source of skill files, two agents, no copies. See [Installation](#installation).
+
 ## Repository Structure
 
 ```
 .claude-plugin/marketplace.json    # Marketplace manifest listing available plugins
+install-codex.sh                   # Symlinks agent-agnostic skills into Codex ($CODEX_HOME/skills)
 plugins/
 └── <plugin-name>/
     ├── .claude-plugin/plugin.json # Plugin manifest (name, version, hooks reference)
@@ -75,6 +78,7 @@ When adding a new plugin:
 2. Create `.claude-plugin/plugin.json` with manifest
 3. Add entry to `.claude-plugin/marketplace.json`
 4. Hooks use `${CLAUDE_PLUGIN_ROOT}` variable for relative paths within the plugin
+5. If the plugin's skills are agent-agnostic (no Claude-only features — hooks, `/compact`, Agent Teams, the usage endpoint), add its name to `AGENT_AGNOSTIC_PLUGINS` in `install-codex.sh` so Codex gets them too. Keep skills self-contained: a portable skill must not depend on `${CLAUDE_PLUGIN_ROOT}` or Claude-only tools.
 
 Hook matchers in `hooks.json`:
 - `"*"` matches all tools
@@ -83,6 +87,8 @@ Hook matchers in `hooks.json`:
 
 ## Installation
 
+### Claude Code (plugin marketplace)
+
 ```bash
 # Add marketplace to Claude Code
 /plugin marketplace add https://github.com/mexcool/claude-code-toolkit
@@ -90,3 +96,13 @@ Hook matchers in `hooks.json`:
 # Install a plugin
 /plugin install claude-dev-tools@claude-code-toolkit
 ```
+
+### Codex (agent-agnostic skills)
+
+Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/.codex/skills`). Symlink the agent-agnostic skills there:
+
+```bash
+./install-codex.sh   # idempotent; re-run after pulling new skills
+```
+
+Installs `axi`, `cursor-cli-dev`, `gist`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.

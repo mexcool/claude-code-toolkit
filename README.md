@@ -1,18 +1,26 @@
 # Claude Code Toolkit
 
-A collection of Claude Code plugins for enhanced development workflows.
+A collection of Claude Code plugins for enhanced development workflows. The agent-agnostic skills also run under **Codex** — see [Installation](#installation).
 
 ## Available Plugins
 
-| Plugin | Description |
-|--------|-------------|
-| [claude-dev-tools](./plugins/claude-dev-tools) | Context optimization and continuous learning tools |
-| [cli-dev](./plugins/cli-dev) | Skills for designing and reviewing agent-friendly CLI tools |
-| [obsidian-helper](./plugins/obsidian-helper) | Session notes and task tracking in Obsidian |
-| [pastila](./plugins/pastila) | Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse) |
-| [ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior-dev mode — YAGNI, stdlib first, no unrequested abstractions (third-party, referenced) |
+The **Codex** column marks plugins whose skills are agent-agnostic and exported by `install-codex.sh`.
+
+| Plugin | Description | Codex |
+|--------|-------------|:-----:|
+| [claude-dev-tools](./plugins/claude-dev-tools) | Context optimization and continuous learning tools | — |
+| [cli-dev](./plugins/cli-dev) | Skills for designing and reviewing agent-friendly CLI tools | ✓ |
+| [gist](./plugins/gist) | GitHub Gists as a lightweight pastebin via the `gh` CLI | ✓ |
+| [obsidian-helper](./plugins/obsidian-helper) | Session notes and task tracking in Obsidian | — |
+| [pastila](./plugins/pastila) | Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse) | — |
+| [prompts](./plugins/prompts) | Reusable starter prompts — `pr-review`, `ticket-kickoff` | ✓ |
+| [ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior-dev mode — YAGNI, stdlib first, no unrequested abstractions (third-party, referenced) | — |
+
+`claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams); `obsidian-helper` / `pastila` ship slash-commands, not skills — so neither is exported to Codex.
 
 ## Installation
+
+### Claude Code
 
 ```bash
 # Add the marketplace
@@ -23,6 +31,16 @@ A collection of Claude Code plugins for enhanced development workflows.
 ```
 
 Or use the interactive `/plugin` command to browse and install.
+
+### Codex
+
+Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/.codex/skills`). Clone this repo and symlink the agent-agnostic skills into place:
+
+```bash
+./install-codex.sh   # idempotent; re-run after pulling new skills
+```
+
+This links `axi`, `cursor-cli-dev`, `gist`, `pr-review`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
 
 ## Adding a Skill to an Existing Plugin
 
