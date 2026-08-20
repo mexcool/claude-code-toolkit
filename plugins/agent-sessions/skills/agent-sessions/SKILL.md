@@ -19,8 +19,10 @@ Recover parallel agents after the terminal dies. Both CLIs keep every session as
 
 ## Usage
 
+Run the script from this skill's own directory — the agent is told that base path when the skill loads, so use it rather than a hardcoded location:
+
 ```bash
-S=${CLAUDE_PLUGIN_ROOT}/skills/agent-sessions/scripts/agent-sessions.py
+S=<this-skill-dir>/scripts/agent-sessions.py
 
 uv run $S list                       # last 24h, split live vs resumable (default)
 uv run $S list --hours 72 --repo myrepo

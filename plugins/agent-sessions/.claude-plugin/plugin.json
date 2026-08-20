@@ -1,0 +1,16 @@
+{
+  "name": "agent-sessions",
+  "version": "0.1.0",
+  "description": "Find, search, and resume Claude Code and Codex agent sessions after a terminal or multiplexer dies",
+  "author": {
+    "name": "mexcool"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "codex",
+    "sessions",
+    "recovery",
+    "worktree"
+  ]
+}

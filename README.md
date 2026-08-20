@@ -9,6 +9,7 @@ The **Codex** column marks plugins whose skills are agent-agnostic and exported 
 | Plugin | Description | Codex |
 |--------|-------------|:-----:|
 | [claude-dev-tools](./plugins/claude-dev-tools) | Context optimization and continuous learning tools | — |
+| [agent-sessions](./plugins/agent-sessions) | Find and resume Claude Code / Codex sessions after a terminal dies | ✓ |
 | [cli-dev](./plugins/cli-dev) | Skills for designing and reviewing agent-friendly CLI tools | ✓ |
 | [gist](./plugins/gist) | GitHub Gists as a lightweight pastebin via the `gh` CLI | ✓ |
 | [obsidian-helper](./plugins/obsidian-helper) | Session notes and task tracking in Obsidian | — |
@@ -40,7 +41,7 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-This links `axi`, `cursor-cli-dev`, `gist`, `pr-review`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
+This links `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `pr-review`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
 
 ## Adding a Skill to an Existing Plugin
 

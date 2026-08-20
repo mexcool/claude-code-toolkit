@@ -53,9 +53,15 @@ Context optimization, continuous learning, and agent orchestration tools:
 
 - **orchestrate-implementation**: Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns agents in worktrees, monitors progress, relays answers, and cleans up.
 
-- **agent-sessions**: Finds, searches, and resumes Claude Code and Codex sessions after a terminal or multiplexer dies. Reads the on-disk JSONL transcripts, matches them against live processes, and prints copy-paste `cd … && <cli> --resume …` commands. Subcommands: `list`, `find <pattern>`, `show <id>`.
-
 - **claude-limits**: Shows real Claude plan usage limits (session/weekly/per-model/monthly extra-usage) by reading the local OAuth token and calling the `/api/oauth/usage` endpoint. Reports actual plan-limit percentages, not log-based estimates. Subscription auth only — not applicable under Bedrock or a raw API key.
+
+### agent-sessions
+
+Agent-agnostic (exported to Codex):
+
+- **agent-sessions**: Finds, searches, and resumes Claude Code and Codex sessions after a terminal or multiplexer dies. Reads the on-disk JSONL transcripts, matches them against live processes, and prints copy-paste `cd … && <cli> --resume …` commands. Subcommands: `list` (live vs resumable), `find <pattern>` (rank transcripts by mention count), `show <id>` (read a transcript's human turns).
+
+  Scans both `~/.claude/projects` and `~/.codex/sessions` on every run, whichever agent invokes it — a dead terminal loses both at once. Launch commands in the printed lines default to stock `claude` / `codex`; override with `AGENT_SESSIONS_CLAUDE_CMD` / `AGENT_SESSIONS_CODEX_CMD` for wrapper aliases.
 
 ### prompts
 
@@ -116,4 +122,4 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-Installs `axi`, `cursor-cli-dev`, `gist`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
+Installs `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
