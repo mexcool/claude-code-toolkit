@@ -34,11 +34,34 @@ uv run $S find 4821 --hours 720 --top 5
 uv run $S show 9f3c1a2b --limit 5    # read a transcript's human turns (id prefix ok)
 ```
 
-`list` prints live agents first, then a resumable block where each entry is a ready-to-paste `cd … && claude --resume …` or `cd … && codex resume …`, plus the branch and the last human turn so the user can tell sessions apart.
+## What `list` prints
 
-Relay the commands verbatim. The `cd` is **required**: `codex resume` filters its picker by cwd, and Claude keys sessions by the directory the session *started* in.
+```
+LIVE under herdr — reattach with `herdr`, do NOT resume:
 
-If the user launches these CLIs through wrapper aliases (extra flags, a different auth env), set `AGENT_SESSIONS_CLAUDE_CMD` / `AGENT_SESSIONS_CODEX_CMD` so the printed lines use them.
+  claude  working  ws:t5   Refactor the payment retry path
+  codex   idle     ws:t4   my-feature-worktree
+
+RUNNING (2) — process still up, reattach:
+
+  [claude] PROJ-123  pid 41207  4m ago
+    9f3c1a2b-…  ·  /home/you/code/myrepo
+
+RESUMABLE (6) — last 24h, newest first:
+
+  # PROJ-456 [fix/checkout-timeout] · 2h ago · 1.9 MB
+  # last: prek failed..
+  cd /home/you/code/myrepo/.worktrees/checkout && \
+  claude --resume 4d81ba07-…
+```
+
+Two blocks, one decision: anything under LIVE/RUNNING gets **reattached**, anything under RESUMABLE gets the **command below it**, pasted into a shell.
+
+Relay those command lines verbatim — they are the deliverable, and the user copies them by hand. Each carries the branch and the last human turn so sessions are tellable apart.
+
+The `cd` is **required**: `codex resume` filters its picker by cwd, and Claude keys sessions by the directory the session *started* in.
+
+If the user launches these CLIs through wrapper aliases (extra flags, a different auth env), set `AGENT_SESSIONS_CLAUDE_CMD` / `AGENT_SESSIONS_CODEX_CMD` and the printed lines use those instead. Aliases are fine here — the lines are pasted into an interactive shell.
 
 ## Where things live
 
