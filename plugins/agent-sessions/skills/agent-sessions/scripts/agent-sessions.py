@@ -272,17 +272,30 @@ def _age(mtime: float) -> str:
     return time.strftime("%Y-%m-%d %H:%M", time.localtime(mtime))
 
 
+def _subject(text: str) -> str | None:
+    """The ticket or PR an invocation line is about, if it names one."""
+    if not text:
+        return None
+    if m := TICKET_RE.search(text):  # ABC-123, bare or inside a tracker URL
+        return m.group(0).upper()
+    if m := re.search(r"/pull/(\d+)", text):  # a full PR URL
+        return f"PR {m.group(1)}"
+    if m := re.fullmatch(r"#?(\d{2,6})", text.strip()):  # the whole arg is a number
+        return f"PR {m.group(1)}"
+    return None
+
+
 def _label(s: Session) -> str:
     """What the session is about. The opening invocation beats a ticket tally —
-    transcripts quote unrelated ids (model names, other teams' tickets) freely."""
-    if s.args:
-        return s.args[:44]
-    # A ticket named in the opening turn is the subject; one merely tallied may not be.
-    if opening := TICKET_RE.findall(s.first or ""):
-        return opening[0].upper()
+    transcripts quote unrelated ids (model names, other teams' tickets) freely.
+    Prefer the id inside that invocation over its raw text, so a pasted URL reads
+    as PROJ-123 rather than a truncated link."""
+    for text in (s.args, s.first):
+        if subject := _subject(text or ""):
+            return subject
     if s.tickets:
-        return s.tickets[0]
-    return (s.first or "?")[:44]
+        return s.tickets[0].upper()
+    return (s.args or s.first or "?")[:44]
 
 
 @app.command("list")

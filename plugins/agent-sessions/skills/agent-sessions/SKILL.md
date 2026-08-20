@@ -100,4 +100,6 @@ Learned the hard way; each one produced a wrong answer first.
 
 **`grep` may be aliased to another implementation** (for example `ugrep`), which parses flags differently and fails on `grep -rl -i`. Use `command grep` in ad-hoc shell — which is why the script counts matches in Python instead.
 
+**Set the launch-command vars in `.zshenv`, not `.zshrc`.** The skill is normally run by an agent through a tool call — a non-interactive shell, which sources `.zshenv` only. Put `AGENT_SESSIONS_CLAUDE_CMD` in `.zshrc` and it is silently ignored, so the printed lines fall back to a bare `claude` / `codex` with no hint why.
+
 **Live agents may carry no id on argv.** `claude --resume` (interactive picker) and `claude --worktree` show no session id in `ps`. Match those on `/proc/<pid>/cwd` instead.
