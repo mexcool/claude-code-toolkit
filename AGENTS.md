@@ -8,7 +8,16 @@ This is a **public open-source repo**. All content is visible to anyone. Follow 
 - Never commit secrets, API keys, tokens, or credentials
 - Use generic examples (e.g., `PROJ-123`) — no internal project names, team prefixes, or real ticket IDs
 - No internal URLs, Slack channels, employee names, or company-specific references
+- No personal shell aliases or machine paths — a skill must run for a stranger. Make the launch command configurable (env var or flag) with a stock default, rather than hardcoding a wrapper alias
 - Review diffs before committing for accidental leaks
+
+> **Agents: this bites hardest when a skill is distilled from real work.** The session you learned the lesson in is full of real ticket IDs, PR numbers, repo names, and hostnames, and they get copied across verbatim as "examples". Before committing, scrub the diff:
+>
+> ```bash
+> git diff --cached | grep -niE '<your-org>|<your-ticket-prefix>-[0-9]|<your-domain>|/Users/|/home/[a-z]'
+> ```
+>
+> Rewrite each hit as a placeholder — `PROJ-123`, `myrepo`, `~/…`. Keep the *lesson*, drop the *instance*.
 
 ## Project Overview
 
@@ -45,6 +54,14 @@ Context optimization, continuous learning, and agent orchestration tools:
 - **orchestrate-implementation**: Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns agents in worktrees, monitors progress, relays answers, and cleans up.
 
 - **claude-limits**: Shows real Claude plan usage limits (session/weekly/per-model/monthly extra-usage) by reading the local OAuth token and calling the `/api/oauth/usage` endpoint. Reports actual plan-limit percentages, not log-based estimates. Subscription auth only — not applicable under Bedrock or a raw API key.
+
+### agent-sessions
+
+Agent-agnostic (exported to Codex):
+
+- **agent-sessions**: Finds, searches, and resumes Claude Code and Codex sessions after a terminal or multiplexer dies. Reads the on-disk JSONL transcripts, matches them against live processes, and prints copy-paste `cd … && <cli> --resume …` commands. Subcommands: `list` (live vs resumable), `find <pattern>` (rank transcripts by mention count), `show <id>` (read a transcript's human turns).
+
+  Scans both `~/.claude/projects` and `~/.codex/sessions` on every run, whichever agent invokes it — a dead terminal loses both at once. Launch commands in the printed lines default to stock `claude` / `codex`; override with `AGENT_SESSIONS_CLAUDE_CMD` / `AGENT_SESSIONS_CODEX_CMD` for wrapper aliases.
 
 ### prompts
 
@@ -105,4 +122,4 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-Installs `axi`, `cursor-cli-dev`, `gist`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
+Installs `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
