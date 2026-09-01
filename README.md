@@ -15,6 +15,7 @@ The **Codex** column marks plugins whose skills are agent-agnostic and exported 
 | [obsidian-helper](./plugins/obsidian-helper) | Session notes and task tracking in Obsidian | — |
 | [pastila](./plugins/pastila) | Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse) | — |
 | [prompts](./plugins/prompts) | Reusable starter prompts — `pr-review`, `ticket-kickoff` | ✓ |
+| [reference-docs](./plugins/reference-docs) | Reference books/docs as on-demand skills — `inference-engineering` ([Baseten's Inference Engineering book](https://www.baseten.co/inference-engineering/)) | ✓ |
 | [ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior-dev mode — YAGNI, stdlib first, no unrequested abstractions (third-party, referenced) | — |
 
 `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams); `obsidian-helper` / `pastila` ship slash-commands, not skills — so neither is exported to Codex.
@@ -41,7 +42,7 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-This links `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `pr-review`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
+This links `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `inference-engineering`, `pr-review`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
 
 ## Adding a Skill to an Existing Plugin
 
