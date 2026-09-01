@@ -40,6 +40,11 @@
       "description": "Reusable starter prompts as skills (pr-review, ticket-kickoff) \u2014 encode the boilerplate you'd otherwise paste at the start of every session."
     },
     {
+      "name": "reference-docs",
+      "source": "./plugins/reference-docs",
+      "description": "Reference books and docs as skills — each skill embeds a section map of an LLM-published text (llms.txt style) and fetches only the sections relevant to the conversation. Currently: Inference Engineering (Baseten Books, 2026)."
+    },
+    {
       "name": "ponytail",
       "source": {
         "source": "github",

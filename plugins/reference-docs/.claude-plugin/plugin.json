@@ -1,0 +1,13 @@
+{
+  "name": "reference-docs",
+  "version": "0.1.0",
+  "description": "Reference books and docs as skills — each skill embeds a section map of an LLM-published text (llms.txt style) and fetches only the sections relevant to the conversation",
+  "author": {
+    "name": "mexcool"
+  },
+  "license": "MIT",
+  "keywords": [
+    "inference",
+    "engineering"
+  ]
+}

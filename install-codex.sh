@@ -19,7 +19,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CODEX_SKILLS="${CODEX_HOME:-$HOME/.codex}/skills"
 
-AGENT_AGNOSTIC_PLUGINS=(agent-sessions cli-dev gist prompts)
+AGENT_AGNOSTIC_PLUGINS=(agent-sessions cli-dev gist prompts reference-docs)
 
 mkdir -p "$CODEX_SKILLS"
 echo "Installing agent-agnostic skills into $CODEX_SKILLS"
