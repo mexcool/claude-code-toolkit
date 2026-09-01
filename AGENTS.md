@@ -70,6 +70,14 @@ Reusable starter prompts as skills — encode the boilerplate you'd otherwise pa
 - **`/pr-review <PR>`**: Principal-engineer PR review with cross-repo, cross-PR context. Skips nitpicks; flags over-engineering in both the PR and proposed fixes.
 - **`/ticket-kickoff <ID>`**: Gather full context on a ticket (parent/related/blocked-by, multi-repo code, recent PRs) and summarize before writing any code.
 
+### reference-docs
+
+Agent-agnostic (exported to Codex). Reference books/docs published for LLM consumption (llms.txt style), each as a skill that embeds the text's section map and fetches only the sections relevant to the conversation — never the full text:
+
+- **inference-engineering**: Grounds model-serving and inference-optimization answers in *Inference Engineering* (Philip Kiely, Baseten Books, 2026). Covers inference engines, quantization, speculative decoding, caching, GPU hardware, modality-specific serving, and production infra. Fetches per-section markdown from `baseten.co/inference-engineering/book/…` on demand.
+
+To add another book: check it publishes stable per-section URLs (an `llms.txt` index is the tell), then add a sibling skill whose SKILL.md holds the section map and fetch instructions.
+
 ### pastila
 
 Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse's encrypted pastebin):
@@ -122,4 +130,4 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-Installs `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
+Installs `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `inference-engineering`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
