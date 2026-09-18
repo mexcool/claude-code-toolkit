@@ -13,6 +13,7 @@ The user gave you a PR (URL or number). Do a principal-engineer review, not a di
 2. **Map the ecosystem**: follow every linked ticket, referenced PR, and mentioned repo. Read them. Many PRs only make sense as one node in a wider initiative — find that initiative.
 3. **Read surrounding code**: not just the changed lines. Understand the module the diff lives in, its callers, and the conventions it follows.
 4. **Review with principal-engineer hat**:
+   - **Reason from the problem, not the diff**: write down, in one sentence, what must be true after this PR that wasn't before. Check the diff against that sentence, not against itself: is this the right way to get there (ask hardest when the PR crosses services or introduces a new pattern), and does the rule the diff encodes actually guarantee it — try to construct an input that passes the rule and still breaks the property. A fix that only closes the reviewer's last example will be back for another round.
    - Real issues only: correctness, design, integration, missed cases, hidden coupling, wrong abstraction level.
    - **No nitpicks**: no style, no naming preferences, no "you could also..." that adds nothing.
    - Flag over-engineering aggressively — in both the PR *and* any fix you propose. The simplest correct change wins.
