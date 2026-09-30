@@ -23,7 +23,7 @@ This is a **public open-source repo**. All content is visible to anyone. Follow 
 
 This is a Claude Code plugin marketplace containing reusable plugins for enhanced development workflows. Plugins provide skills, hooks, commands, and agents that extend Claude Code's functionality.
 
-The plugins are authored for Claude Code, but the **agent-agnostic skills** (CLI design, gist, PR/ticket prompts) are also consumable by **Codex**, which reads skills from `$CODEX_HOME/skills`. `install-codex.sh` symlinks those skills there — one source of skill files, two agents, no copies. See [Installation](#installation).
+The plugins are authored for Claude Code, but the **agent-agnostic skills** (see the install list under [Installation](#installation)) are also consumable by **Codex**, which reads skills from `$CODEX_HOME/skills`. `install-codex.sh` symlinks those skills there — one source of skill files, two agents, no copies. See [Installation](#installation).
 
 This repo has no ticket tracker. Commit and PR titles use conventional-commit style (`feat(pr-review): …`, `chore(prompts): …`), not ticket IDs — skip the ticket steps of any global git workflow.
 
