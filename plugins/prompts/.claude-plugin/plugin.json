@@ -1,6 +1,6 @@
 {
   "name": "prompts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Reusable starter prompts as skills — encode the boilerplate you'd otherwise paste at the start of every session",
   "author": {
     "name": "mexcool"

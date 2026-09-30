@@ -16,7 +16,7 @@ The user gave you a PR (URL or number). Do a principal-engineer review, not a di
    - **Reason from the problem, not the diff**: write down, in one sentence, what must be true after this PR that wasn't before. Check the diff against that sentence, not against itself: is this the right way to get there (ask hardest when the PR crosses services or introduces a new pattern), and does the rule the diff encodes actually guarantee it — try to construct an input that passes the rule and still breaks the property. A fix that only closes the reviewer's last example will be back for another round.
    - Real issues only: correctness, design, integration, missed cases, hidden coupling, wrong abstraction level.
    - **No nitpicks**: no style, no naming preferences, no "you could also..." that adds nothing.
-   - Flag over-engineering aggressively — in both the PR *and* any fix you propose. The simplest correct change wins.
+   - Flag over-engineering — in both the PR *and* any fix you propose. The simplest correct change wins.
 5. **Summarize** in the chat:
    - What the PR does and where it fits in the wider work.
    - Issues, severity-ranked. For each: what's wrong, why it matters, the minimum change to fix it.
