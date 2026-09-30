@@ -23,7 +23,9 @@ This is a **public open-source repo**. All content is visible to anyone. Follow 
 
 This is a Claude Code plugin marketplace containing reusable plugins for enhanced development workflows. Plugins provide skills, hooks, commands, and agents that extend Claude Code's functionality.
 
-The plugins are authored for Claude Code, but the **agent-agnostic skills** (CLI design, gist, PR/ticket prompts) are also consumable by **Codex**, which reads skills from `$CODEX_HOME/skills`. `install-codex.sh` symlinks those skills there — one source of skill files, two agents, no copies. See [Installation](#installation).
+The plugins are authored for Claude Code, but the **agent-agnostic skills** (see the install list below) are also consumable by **Codex**, which reads skills from `$CODEX_HOME/skills`. `install-codex.sh` symlinks those skills there — one source of skill files, two agents, no copies. See [Installation](#installation).
+
+This repo has no ticket tracker. Commit and PR titles use conventional-commit style (`feat(pr-review): …`, `chore(prompts): …`), not ticket IDs — skip the ticket steps of any global git workflow.
 
 ## Repository Structure
 
@@ -77,6 +79,23 @@ Agent-agnostic (exported to Codex). Reference books/docs published for LLM consu
 - **inference-engineering**: Grounds model-serving and inference-optimization answers in *Inference Engineering* (Philip Kiely, Baseten Books, 2026). Covers inference engines, quantization, speculative decoding, caching, GPU hardware, modality-specific serving, and production infra. Fetches per-section markdown from `baseten.co/inference-engineering/book/…` on demand.
 
 To add another book: check it publishes stable per-section URLs (an `llms.txt` index is the tell), then add a sibling skill whose SKILL.md holds the section map and fetch instructions.
+
+### cli-dev
+
+Agent-agnostic (exported to Codex). Skills for designing and reviewing CLIs that coding agents drive via shell execution:
+
+- **axi**: Agent eXperience Interface — ergonomic standards for agent-facing CLI tools. Use when building, modifying, or reviewing any CLI an agent will call.
+- **cursor-cli-dev**: Designs or reviews CLIs for reliable non-interactive use: flags over prompts, layered `--help` with examples, stdin/pipelines, fast actionable errors, idempotency, dry-run.
+
+### gist
+
+Agent-agnostic (exported to Codex):
+
+- **gist**: Conventions for GitHub Gists as an internal pastebin via the `gh` CLI — creating, sharing, reading, and piping gist content into other tools.
+
+### obsidian-helper
+
+- **`/done` command**: Summarizes the current session and saves it as a note in the Obsidian work vault.
 
 ### pastila
 

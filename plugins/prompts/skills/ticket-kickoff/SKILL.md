@@ -13,10 +13,8 @@ The user gave you a ticket (ID or URL). Build a full picture before touching any
 2. **Follow every link**: parent, sub-issues, blocked-by, blocks, related, and any tickets mentioned in the body or comments. Read them too. The ticket usually only makes sense as one node in a wider initiative — find that initiative.
 3. **Identify the repos involved**. The work may span backend, data, frontend, infra, SDKs. Read the relevant code in each — not just one repo.
 4. **Check recent PRs** touching the same area, even merged ones. Patterns and conventions live there.
-5. **STOP. Do not write code yet.**
-6. **Summarize in the chat**:
+5. **Summarize in the chat**, before writing any code:
    - What the ticket is asking for and why (the wider initiative it fits into).
    - Current state of the system relative to that ask.
    - What needs to happen, in what order.
-   - Anything ambiguous or under-specified.
-7. Make sure you have a complete understanding and ask any clarifying questions if needed.
+   - Anything ambiguous or under-specified — ask about it rather than guessing.

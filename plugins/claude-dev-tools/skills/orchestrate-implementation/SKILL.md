@@ -83,7 +83,7 @@ Use cmux to spawn agents. Refer to the `/cmux` skill for full command
 reference (pane management, sending commands, reading output).
 
 Each agent gets its own pane and worktree. Use the **latest Opus model**
-(currently Opus 4.6) for implementation agents. Always use **interactive
+for implementation agents. Always use **interactive
 TUI mode** (NOT headless `-p`) so the user can watch agent progress in
 real time.
 
