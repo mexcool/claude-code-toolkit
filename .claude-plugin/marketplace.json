@@ -37,7 +37,7 @@
     {
       "name": "prompts",
       "source": "./plugins/prompts",
-      "description": "Reusable starter prompts as skills (pr-review, ticket-kickoff) \u2014 encode the boilerplate you'd otherwise paste at the start of every session."
+      "description": "Reusable starter prompts as skills (pr-review, ticket-kickoff, kickoff-review) \u2014 encode the boilerplate you'd otherwise paste at the start of every session."
     },
     {
       "name": "reference-docs",

@@ -71,6 +71,7 @@ Reusable starter prompts as skills — encode the boilerplate you'd otherwise pa
 
 - **`/pr-review <PR>`**: Principal-engineer PR review with cross-repo, cross-PR context. Skips nitpicks; flags over-engineering in both the PR and proposed fixes.
 - **`/ticket-kickoff <ID>`**: Gather full context on a ticket (parent/related/blocked-by, multi-repo code, recent PRs) and summarize before writing any code.
+- **`/kickoff-review <ID>`**: Second-agent review of a pasted kickoff before implementation — simplicity and scope creep, what must land first, checked against the ticket and the latest `origin/main`. Review only; sets expectations for the reply and PR rounds.
 
 ### reference-docs
 
@@ -149,4 +150,4 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-Installs `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `inference-engineering`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
+Installs `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `inference-engineering`, `kickoff-review`, `pr-review`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
