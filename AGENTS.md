@@ -57,6 +57,8 @@ Context optimization, continuous learning, and agent orchestration tools:
 
 - **claude-limits**: Shows real Claude plan usage limits (session/weekly/per-model/monthly extra-usage) by reading the local OAuth token and calling the `/api/oauth/usage` endpoint. Reports actual plan-limit percentages, not log-based estimates. Subscription auth only — not applicable under Bedrock or a raw API key.
 
+- **follow-up-check**: Schedules a check on shipped work that needs data that does not exist yet. A Linear comment posted now points at a secret gist holding the check plan, scripts and baselines; a native Linear `issueReminder` pings the user on the due date (optionally also in Slack). An optional one-shot cloud routine (`/schedule`) re-posts the comment on the due date for people following the issue. `scripts/follow-up.py` prints a weekday due time with a transcript-expiry warning (`due`) and the session facts to resume (`session`, from `CLAUDE_CODE_SESSION_ID`). Kept with the Claude-specific tools because it relies on Claude Code sessions and routines.
+
 ### agent-sessions
 
 Agent-agnostic (exported to Codex):
