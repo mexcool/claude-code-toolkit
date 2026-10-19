@@ -14,6 +14,9 @@ Transcript layout:
           subagents nest under <session-uuid>/subagents/agent-<id>.jsonl
   Codex   ~/.codex/sessions/YYYY/MM/DD/rollout-<ts>-<session-id>.jsonl
 
+Claude also writes ~/.claude/sessions/<pid>.json per interactive process and
+deletes it on a clean exit, so a file whose pid is gone marks a crashed session.
+
 Big transcripts are common (100 MB+), so metadata comes from a bounded head
 read and the last user turn from a bounded tail read. Nothing loads whole.
 """
@@ -37,6 +40,7 @@ app = typer.Typer(
 )
 
 CLAUDE_ROOT = Path.home() / ".claude" / "projects"
+CLAUDE_PIDS = Path.home() / ".claude" / "sessions"
 CODEX_ROOTS = [
     Path.home() / ".codex" / "sessions",
     Path.home() / ".codex" / "archived_sessions",
@@ -80,13 +84,25 @@ class Session:
     args: str | None = None
     tickets: list[str] = field(default_factory=list)
     pid: int | None = None  # set when a live process holds this session
+    crashed: dict | None = None  # its ~/.claude/sessions entry, when the process crashed
 
     @property
     def resume_cmd(self) -> str:
         cwd = self.cwd or str(Path.home())
         if self.tool == "claude":
+            cwd = _start_cwd(cwd, self.path.parent.name)
             return f"cd {cwd} && \\\n  {CLAUDE_CMD} --resume {self.sid}"
         return f"cd {cwd} && \\\n  {CODEX_CMD} resume {self.sid}"
+
+
+def _start_cwd(cwd: str, project_dir: str) -> str:
+    """Claude files a session under its *start* cwd, slugified, and resumes only from
+    there. A session started in a repo root that moved into a worktree records the
+    worktree as its cwd, so walk up to the directory whose slug matches."""
+    for p in (Path(cwd), *Path(cwd).parents):
+        if re.sub(r"[^A-Za-z0-9]", "-", str(p)) == project_dir:
+            return str(p)
+    return cwd
 
 
 def _clean(text: str) -> str:
@@ -166,9 +182,11 @@ def _parse(sess: Session) -> Session:
         text = _clean(raw)
         if m := ARGS_RE.search(raw):
             sess.args = sess.args or _clean(m.group(1))[:140] or None
+        if _is_noise(text):  # skill preambles are full of example ids
+            continue
         for t in TICKET_RE.findall(text):
             tickets[t] = tickets.get(t, 0) + 1
-        if sess.first is None and text and not _is_noise(text):
+        if sess.first is None and text:
             sess.first = text[:240]
 
     for rec in _iter_json(_tail(sess.path)):
@@ -239,6 +257,70 @@ def _live() -> dict[str, dict]:
         except OSError:
             cwd = None
         out.setdefault(sid, {"pid": pid, "cwd": cwd, "tool": exe})
+    return out
+
+
+def _pid_alive(pid: int, proc_start: str | None) -> bool:
+    """Is pid still the process that wrote its session file? Pids get reused, so on
+    Linux compare /proc start time with the file's `procStart`."""
+    if not Path("/proc/self").exists():  # macOS: existence is the best we get
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            pass
+        return True
+    try:
+        fields = Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()
+    except OSError:
+        return False
+    return not proc_start or fields[19] == proc_start  # field 22: starttime
+
+
+def _booted(info: dict) -> float | None:
+    """When the machine that ran this process booted: its start time minus the
+    uptime it started at (Linux `procStart` counts clock ticks since boot)."""
+    if not Path("/proc/self").exists():
+        return None
+    try:
+        return info["startedAt"] / 1000 - int(info["procStart"]) / os.sysconf("SC_CLK_TCK")
+    except (KeyError, ValueError):
+        return None
+
+
+def _crashed() -> dict[str, dict]:
+    """Session id -> its newest ~/.claude/sessions entry, when that process is gone.
+
+    `died_by` is the first reboot after the process started, when known: a session
+    written to after it was resumed since, and is no longer lost."""
+    infos = []
+    for f in CLAUDE_PIDS.glob("*.json"):
+        try:
+            info = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+        if isinstance(info, dict) and {"sessionId", "startedAt", "pid"} <= info.keys():
+            infos.append(info)
+
+    boots = [b for b in map(_booted, infos) if b]
+    try:  # the current boot, which no surviving file may have seen start
+        stat = Path("/proc/stat").read_text()
+        boots.append(float(re.search(r"^btime (\d+)", stat, re.MULTILINE).group(1)))
+    except (OSError, AttributeError):
+        pass
+    boots.sort()
+
+    newest = {i["sessionId"]: i for i in sorted(infos, key=lambda i: i["startedAt"])}
+    out = {}
+    for sid, info in newest.items():
+        if _pid_alive(int(info["pid"]), info.get("procStart")):
+            continue
+        b = _booted(info)
+        # Estimates trail the real boot by the process's startup lag (up to minutes
+        # when a multiplexer relaunches many at once); real reboots are far apart.
+        info["died_by"] = next((x for x in boots if b and x > b + 3600), None)
+        out[sid] = info
     return out
 
 
@@ -320,6 +402,15 @@ def list_sessions(
                 s.pid = anon["pid"]
                 break
 
+    stale = _crashed()
+    for s in sessions:
+        info = stale.get(s.sid)
+        if s.pid or not info:
+            continue
+        if info["died_by"] and s.mtime > info["died_by"]:  # resumed after that reboot
+            continue
+        s.crashed = info
+
     if as_json:
         typer.echo(
             json.dumps(
@@ -331,6 +422,7 @@ def list_sessions(
                         "branch": s.branch,
                         "tickets": s.tickets,
                         "pid": s.pid,
+                        "crashed": bool(s.crashed),
                         "mtime": s.mtime,
                         "resume": s.resume_cmd.replace("\\\n ", ""),
                     }
@@ -352,7 +444,8 @@ def list_sessions(
         typer.echo("")
 
     alive = [s for s in sessions if s.pid]
-    dead = [s for s in sessions if not s.pid]
+    crashed = [s for s in sessions if s.crashed]
+    dead = [s for s in sessions if not s.pid and not s.crashed]
 
     if alive:
         typer.echo(f"RUNNING ({len(alive)}) — process still up, reattach:\n")
@@ -363,13 +456,26 @@ def list_sessions(
             )
         typer.echo("")
 
+    if crashed:
+        typer.echo(
+            f"CRASHED ({len(crashed)}) — open when their process died, resume these:\n"
+        )
+        for s in crashed:
+            _print_resumable(s)
+
     typer.echo(f"RESUMABLE ({len(dead)}) — last {hours:g}h, newest first:\n")
     for s in dead:
-        branch = f" [{s.branch}]" if s.branch else ""
-        typer.echo(f"  # {_label(s)}{branch} · {_age(s.mtime)} · {s.size / 1e6:.1f} MB")
-        if s.last:
-            typer.echo(f"  # last: {s.last[:110]}")
-        typer.echo(f"  {s.resume_cmd}\n")
+        _print_resumable(s)
+
+
+def _print_resumable(s: Session) -> None:
+    branch = f" [{s.branch}]" if s.branch else ""
+    name = (s.crashed or {}).get("name")  # the session's name, often its tab's
+    named = f"{name} · " if name else ""
+    typer.echo(f"  # {named}{_label(s)}{branch} · {_age(s.mtime)} · {s.size / 1e6:.1f} MB")
+    if s.last:
+        typer.echo(f"  # last: {s.last[:110]}")
+    typer.echo(f"  {s.resume_cmd}\n")
 
 
 @app.command("find")
