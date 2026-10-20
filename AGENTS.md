@@ -63,9 +63,9 @@ Context optimization, continuous learning, and agent orchestration tools:
 
 Agent-agnostic (exported to Codex):
 
-- **agent-sessions**: Finds, searches, and resumes Claude Code and Codex sessions after a terminal or multiplexer dies. Reads the on-disk JSONL transcripts, matches them against live processes, and prints copy-paste `cd … && <cli> --resume …` commands. Subcommands: `list` (live vs resumable), `find <pattern>` (rank transcripts by mention count), `show <id>` (read a transcript's human turns).
+- **agent-sessions**: Finds, searches, and resumes Claude Code and Codex sessions after a terminal or multiplexer dies. Reads the on-disk JSONL transcripts, matches them against live processes, and prints copy-paste `cd … && <cli> --resume …` commands. Subcommands: `list` (live vs crashed vs resumable), `find <pattern>` (rank transcripts by mention count), `show <id>` (read a transcript's human turns).
 
-  Scans both `~/.claude/projects` and `~/.codex/sessions` on every run, whichever agent invokes it — a dead terminal loses both at once. Launch commands in the printed lines default to stock `claude` / `codex`; override with `AGENT_SESSIONS_CLAUDE_CMD` / `AGENT_SESSIONS_CODEX_CMD` for wrapper aliases.
+  Scans both `~/.claude/projects` and `~/.codex/sessions` on every run, whichever agent invokes it — a dead terminal loses both at once. Crashed Claude sessions come from the `~/.claude/sessions/<pid>.json` files Claude leaves behind when a process dies without a clean exit; Codex keeps no equivalent. Launch commands in the printed lines default to stock `claude` / `codex`; override with `AGENT_SESSIONS_CLAUDE_CMD` / `AGENT_SESSIONS_CODEX_CMD` for wrapper aliases.
 
 ### prompts
 
