@@ -1,7 +1,7 @@
 ---
 name: agent-sessions
 description: "Find, search, and resume Claude Code and Codex agent sessions after a terminal or multiplexer dies. Use when asked to recover lost agents, find which session worked on a ticket or PR, list what ran recently, or produce copy-paste commands to cd into a worktree and resume the right session."
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Agent Sessions
@@ -15,7 +15,7 @@ Recover parallel agents after the terminal dies. Both CLIs keep every session as
 - Process alive → **reattach** the multiplexer.
 - Process gone → **resume** with the printed command.
 
-`list` makes that split for you.
+`list` makes that split for you, and puts the sessions that were still open when their process died under CRASHED.
 
 ## Usage
 
@@ -47,6 +47,13 @@ RUNNING (2) — process still up, reattach:
   [claude] PROJ-123  pid 41207  4m ago
     9f3c1a2b-…  ·  /home/you/code/myrepo
 
+CRASHED (1) — open when their process died, resume these:
+
+  # checkout-review · PROJ-789 [main] · 9h ago · 3.2 MB
+  # last: ok, post the review
+  cd /home/you/code/myrepo && \
+  claude --resume 7be0c512-…
+
 RESUMABLE (6) — last 24h, newest first:
 
   # PROJ-456 [fix/checkout-timeout] · 2h ago · 1.9 MB
@@ -55,7 +62,7 @@ RESUMABLE (6) — last 24h, newest first:
   claude --resume 4d81ba07-…
 ```
 
-Two blocks, one decision: anything under LIVE/RUNNING gets **reattached**, anything under RESUMABLE gets the **command below it**, pasted into a shell.
+One decision: anything under LIVE/RUNNING gets **reattached**, anything under CRASHED or RESUMABLE gets the **command below it**, pasted into a shell. CRASHED answers "which agents did I lose?"; its lines lead with the session's name, which usually matches the tab it ran in.
 
 Relay those command lines verbatim — they are the deliverable, and the user copies them by hand. Each carries the branch and the last human turn so sessions are tellable apart.
 
@@ -70,6 +77,8 @@ If the user launches these CLIs through wrapper aliases (extra flags, a differen
     └── <session-uuid>/subagents/agent-<id>.jsonl     # subagent transcripts
 ~/.codex/sessions/YYYY/MM/DD/rollout-<iso-ts>-<uuid>.jsonl
 ~/.codex/session_index.jsonl                          # id → thread_name, partial
+~/.claude/sessions/<pid>.json    # one per running claude: session id, start cwd, name;
+                                 # deleted on a clean exit, so a leftover marks a crash
 ```
 
 ## Multiplexers
@@ -78,11 +87,19 @@ Agents are usually hosted in a multiplexer — tmux, cmux, or herdr. When one di
 
 `list` folds in `herdr agent list` when that binary is present. There, `herdr tab list` shows every tab and marks dead agents as `agent_status: "unknown"` — those are the ones that need resuming.
 
+To put a crashed agent back in its old tab, send its printed line into that pane: `herdr pane run <pane> '<line>'`, or `tmux send-keys -t <pane> '<line>' Enter`. Ask the user which ones first. Some were left open only by accident.
+
 ## Gotchas
 
 Learned the hard way; each one produced a wrong answer first.
 
-**The slug is the *start* cwd, not the work cwd.** A session that began in the repo root and later moved into a worktree still files under the root's slug. Resume from the start cwd. Conversely a worktree-slugged session whose directory was since deleted still resumes — from the parent repo.
+**The slug is the *start* cwd, not the work cwd.** A session that began in the repo root and later moved into a worktree (`claude --worktree` does this) still files under the root's slug, while its transcript records the worktree. Resume from the start cwd; the printed `cd` already walks up to it. Conversely a worktree-slugged session whose directory was since deleted still resumes — from the parent repo.
+
+**CRASHED means "did not exit cleanly".** Reboots, OOM kills and force-closed panes all leave the pid file behind. Within a normal window that is the crash being recovered; widen `--hours` a lot and old force-closed tabs show up too. A session resumed and used after the reboot that killed it drops out. That check needs Linux, which can recover past boot times from the files. When the multiplexer died but the machine did not, a later resume is invisible, so check `last:`. Codex keeps no such record; its lost sessions stay under RESUMABLE.
+
+**`--hours` counts from a session's last activity, not from the crash.** Agents idle over a weekend before the machine went down need `--hours 72` or more to show up.
+
+**Codex's app-server daemon rejects permission flags on resume.** A wrapper that routes through it (`codex --remote …`) fails with "Permission overrides are not supported when resuming a remote task". Resume with a plain launch command instead of the one carrying a bypass flag.
 
 **Codex filenames contain dashes in the timestamp.** `rollout-2026-01-07T10-33-48-<uuid>.jsonl` — never `split("-")` for the id. Anchor a UUID regex at the end of the stem. A truncated id silently fails to match the live process, so a running agent looks dead.
 
