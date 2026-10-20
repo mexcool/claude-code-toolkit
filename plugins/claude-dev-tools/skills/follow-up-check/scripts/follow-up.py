@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import UTC, datetime, time, timedelta
 from pathlib import Path
@@ -44,7 +45,9 @@ def find_transcript(session_id: str) -> Path | None:
 
 
 def start_cwd(path: Path) -> str | None:
-    """The cwd of the first transcript row that records one."""
+    """The directory the session resumes from. A `claude --worktree` session records
+    the worktree as its cwd but may be filed under the repo root's slug, so walk up
+    to the directory whose slug matches the transcript's project dir."""
     with path.open() as fh:
         for _, line in zip(range(200), fh):
             try:
@@ -52,6 +55,9 @@ def start_cwd(path: Path) -> str | None:
             except (ValueError, AttributeError):
                 continue
             if cwd:
+                for p in (Path(cwd), *Path(cwd).parents):
+                    if re.sub(r"[^A-Za-z0-9]", "-", str(p)) == path.parent.name:
+                        return str(p)
                 return cwd
     return None
 
