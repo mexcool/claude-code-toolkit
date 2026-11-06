@@ -11,9 +11,8 @@ Three-agent loop. Lead `<t>-lead` relays and decides. Implementer `<t>-impl`. Re
 Loop folder: `<dir>`
 
 ## How we talk
-- Every handoff is a file in the loop folder. **Print the full file in the chat, word for word.** Then, as your LAST action, send one line and end your turn:
-  `herdr agent prompt <t>-lead "[<t>-<role>] <what> ready: <path>"`
-- Message only the lead. Do not poll or wait. The lead's next message wakes you.
+- Every handoff is a file in the loop folder, with the name the lead gives you. **Print the full file in the chat, word for word,** then end your turn. herdr tells the lead when your turn ends; do not message anyone.
+- Do not poll or wait. The lead's next message wakes you.
 - Never open a dialog (AskUserQuestion, plan mode). A pane with a dialog cannot receive messages. Put questions in your file under `## Questions for the lead`.
 - Messages from the lead start with `[<t>-lead]`.
 ```
@@ -41,7 +40,7 @@ Make the smallest change that meets the ticket: no extras, no speculative tests,
 The implementer owns the shared worktree. Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. Read the PR with `gh pr view` and `gh pr diff`. Post nothing anywhere.
 
 ## Stage 0 — prep (now)
-Read the ticket, its parent and the code it names, so that you have your own view before you see the plan. Write nothing. Ping `prep done`.
+Read the ticket, its parent and the code it names, so that you have your own view before you see the plan. Write nothing; end your turn.
 
 ## Stage 1 — kickoff review
 Use the kickoff review skill on `ticket-kickoff.md`.
