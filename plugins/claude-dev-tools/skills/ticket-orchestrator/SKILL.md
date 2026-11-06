@@ -64,7 +64,7 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 
 ## Steps that need the user
 
-These are merge, apply, deploy, test pages, product decisions, and posts outside the PR (tracker, chat, GitHub reviews). Ask in plain text. When the user says yes, give the step to the implementer in `lead-ops-N.md` with stop conditions:
+These are merge, apply, deploy, test pages, product decisions, and posts outside the PR (tracker, chat, GitHub reviews). Ask in plain text. Before you ask for a merge, read `gh pr diff` yourself and check it against the contract. The reviewer's LGTM does not replace your own read. When the user says yes, give the step to the implementer in `lead-ops-N.md` with stop conditions:
 - pin the reviewed head: `gh pr merge --squash --match-head-commit <sha>`, never `--admin`;
 - give the expected plan summary: `terraform plan -out`, then apply that saved plan;
 - stop at the first failure;
