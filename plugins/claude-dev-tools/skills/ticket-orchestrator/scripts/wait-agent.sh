@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Wait until herdr detects <kind> (claude, codex, ...) in <pane> and it is ready for input.
-# Uses herdr's hook-driven agent state, not the screen: a shell prompt can show the same glyph as an agent.
+# Uses herdr's agent detection, not a raw screen regex: a shell prompt can show the same glyph as an agent.
 # Usage: wait-agent.sh <pane-id> <kind> [timeout-seconds, default 60]
 pane=$1 kind=$2 deadline=$((SECONDS + ${3:-60}))
 while ((SECONDS < deadline)); do

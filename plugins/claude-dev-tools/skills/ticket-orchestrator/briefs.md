@@ -40,7 +40,7 @@ Make the smallest change that meets the ticket: no extras, no speculative tests,
 The implementer owns the shared worktree. Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. Read the PR with `gh pr view` and `gh pr diff`. Post nothing anywhere.
 
 ## Stage 0 — prep (now)
-Read the ticket, its parent and the code it names, so that you have your own view before you see the plan. Write nothing; end your turn.
+Read the ticket, its parent and the code it names, so that you have your own view before you see the plan. Write `prep.md`: what you read and your first concerns, in a few lines.
 
 ## Stage 1 — kickoff review
 Use the kickoff review skill on `ticket-kickoff.md`.
