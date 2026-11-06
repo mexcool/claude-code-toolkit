@@ -50,6 +50,10 @@ uv run skills/follow-up-check/scripts/follow-up.py due --days 14  # next weekday
 uv run skills/follow-up-check/scripts/follow-up.py session        # id, start cwd, resume command
 ```
 
+### ticket-orchestrator
+
+Runs one ticket with two workers in herdr panes: a Claude implementer (kickoff, code, PR) and a Codex reviewer (kickoff review, PR review). The lead only relays handoff files, sorts findings into must-fix, should-fix and drop, and runs the steps that need the user. Workers wake the lead with `herdr agent prompt`, so nobody polls. Set `ORCH_CLAUDE_CMD` / `ORCH_CODEX_CMD` to use your own launch commands.
+
 ## Installation
 
 Add to your Claude Code settings:
