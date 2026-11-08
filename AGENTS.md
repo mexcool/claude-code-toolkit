@@ -121,6 +121,14 @@ When adding a new skill to an existing plugin:
 3. Document the skill in this file under the plugin's section
 4. Run `/reload-plugins` (or `/plugin` to update)
 
+When adding a rule to an existing skill (most often a checklist such as `pr-review`), keep the list from growing forever. Add a line only when all three are true:
+
+1. A real run of the skill missed something.
+2. The current wording should have caught it and did not.
+3. The new line has no domain words: it names the kind of mistake, not the case.
+
+Merge the new line into an existing bullet, and remove a line if you can. Keep each skill to about one screen. "Check each input's unit and bound" passes this test; "count unpriced rows per key" does not.
+
 When adding a new plugin:
 
 1. Create directory structure under `plugins/<name>/`
