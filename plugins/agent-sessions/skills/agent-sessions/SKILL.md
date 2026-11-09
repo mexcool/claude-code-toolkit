@@ -1,7 +1,7 @@
 ---
 name: agent-sessions
 description: "Find, search, and resume Claude Code and Codex agent sessions after a terminal or multiplexer dies. Use when asked to recover lost agents, find which session worked on a ticket or PR, list what ran recently, or produce copy-paste commands to cd into a worktree and resume the right session."
-version: 0.2.0
+version: 0.2.1
 ---
 
 # Agent Sessions
@@ -88,6 +88,8 @@ Agents are usually hosted in a multiplexer — tmux, cmux, or herdr. When one di
 `list` folds in `herdr agent list` when that binary is present. There, `herdr tab list` shows every tab and marks dead agents as `agent_status: "unknown"` — those are the ones that need resuming.
 
 To put a crashed agent back in its old tab, send its printed line into that pane: `herdr pane run <pane> '<line>'`, or `tmux send-keys -t <pane> '<line>' Enter`. Ask the user which ones first. Some were left open only by accident.
+
+herdr 0.9+ relaunches agents itself after a restart, but only sessions that reported their id through its hook since it was installed. It uses the stock `claude --resume`, so those agents come back in the default permission mode, without the flags of the user's launch command. CRASHED lists the ones herdr did not bring back. If a relaunched agent needs different flags, quit it and resume it with the printed line.
 
 ## Gotchas
 
