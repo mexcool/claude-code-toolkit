@@ -72,7 +72,7 @@ These are merge, apply, deploy, test pages, product decisions, and posts outside
 
 The implementer runs these steps because an isolated lead cannot run git in other checkouts (Gotchas). A test page starts an escalation clock. Send it only when the person who must acknowledge it is at the screen, and give them the deadline at once.
 
-**A PR that must not close a multi-PR ticket:** Linear links a ticket id in a branch name, title or body as "closes". Keep the id out of all three. Then link the PR by hand: GraphQL `attachmentLinkGitHubPR(issueId, url, linkKind: contributes)`. After that, check the issue state and `metadata.linkKind`.
+**A PR that must not close a multi-PR ticket:** Linear links a bare ticket id in a branch name, title or body as "closes", and the merge then closes the ticket. Tell the implementer, in the brief, to make the first line of the PR body `Part of PROJ-123` and to keep the id out of the branch name. "Part of" is one of Linear's contributing words (also "ref", "towards", "contributes to"), so the link is `contributes` and the id can stay in the title. When the PR opens, check the issue's attachment `metadata.linkKind`. If it is `closes`, fix the body and check again.
 
 ## End
 
