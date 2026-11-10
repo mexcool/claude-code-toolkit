@@ -1,6 +1,6 @@
 ---
 name: ticket-orchestrator
-description: "Run one ticket end to end with two worker agents in herdr panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review). You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. herdr's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1). For many tickets in parallel, use orchestrate-implementation."
+description: "Run one ticket end to end with two worker agents in herdr panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. herdr's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1). For many tickets in parallel, use orchestrate-implementation."
 version: 0.1.0
 ---
 
@@ -13,6 +13,7 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 | Lead (you) | `<t>-lead` | relays, sorts findings, decides, logs |
 | Implementer | `<t>-impl` | **ticket kickoff** skill, then code, PR, CI |
 | Reviewer | `<t>-rev` | **kickoff review** skill, then **PR review** skill. Read-only |
+| Blind reviewer | `<t>-blind` | **PR review** skill, PR stage only. Round 1 from the ticket and the PR alone, without the plan. Read-only |
 
 `<t>` is the ticket id in lower case (`proj-123`). Use one name everywhere: the user follows the sessions by name in the Claude Code and Codex apps.
 
@@ -59,9 +60,10 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 3. **Later rounds:** the reviewer rechecks only its open findings and what changed. It raises a new finding only if it is must-fix. Allow one exchange per disagreement. After that, decide from the ticket and the code.
 4. **When a stage ends:** at LGTM, at a round with nothing to relay, or when a point comes back without new evidence. There is no hard limit. If a stage reaches round 3, log why and tell the user.
 5. **User decisions that add scope** go out with your next relay, not in the middle of a review, so the reviewer reviews one version.
-6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, validation output, any difference from the contract and why).
-7. **PR review:** the same loop with `pr-review-N.md`, `lead-pr-N.md` and `pr-response-N.md`. The reviewer also checks the PR against the agreed kickoff: anything agreed but missing, anything built but not agreed.
-8. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.
+6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user. Decide the blind reviewer now, before any code exists, and log it: it is on unless the contract is docs only or tests only. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, validation output, any difference from the contract and why).
+7. **PR review:** the same loop with `pr-review-N.md`, `lead-pr-N.md` and `pr-response-N.md`. The reviewer also checks the PR against the agreed kickoff: anything agreed but missing, anything built but not agreed. Do not drop a finding only because it contradicts the ticket, the contract or an earlier decision: drop it with evidence, and send a product call to the user.
+8. **Blind reviewer**, unless you skipped it at step 6 and the PR still matches that docs- or tests-only contract. When `pr-ready.md` lands, make `<dir>-blind/` next to the loop folder (no path to the plan), write `brief-blind.md` there from [briefs.md](briefs.md), split the reviewer's pane down, start `<codex-cmd>`, name it `<t>-blind` as in Setup, and send the brief with the reviewer's round 1. It then runs the loop like the reviewer, writing `pr-blind-N.md` in its folder. Relay once per round, when both reviews are in, and stop sending rounds to a reviewer with no open findings. If the blind reviewer stalls past the grace window, go on without it and log it. The stage ends when both are done.
+9. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.
 
 ## Steps that need the user
 
