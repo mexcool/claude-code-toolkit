@@ -1,6 +1,6 @@
 # Brief templates
 
-Fill in `<t>`, `<TICKET>` and `<dir>` (the absolute loop folder path). Write two files: the shared block plus the role block. Add ticket-specific limits under the role, for example "no apply" or "the ticket must stay open". The blind reviewer's brief (last block) stands alone: it must not learn the plan or the loop.
+Fill in `<t>`, `<TICKET>` and `<dir>` (the absolute loop folder path). Write two files: the shared block plus the role block. Add ticket-specific limits under the role, for example "no apply" or "the ticket must stay open". The blind reviewer's brief (last block) stands alone, so its round 1 never sees the plan.
 
 ## Shared block (both briefs)
 
@@ -55,19 +55,22 @@ In later rounds, recheck only your open findings and what changed. Concede when 
 
 ## Blind reviewer brief
 
-Write it to `<dir>/blind/brief-blind.md` when the PR is ready. `<PRs>` are the PR links from `pr-ready.md`.
+Write it to `<dir>-blind/brief-blind.md` when the PR is ready. `<PRs>` are the PR links from `pr-ready.md`.
 
 ```markdown
 # <TICKET> — blind PR review brief
 
-You review <PRs> for <TICKET> as an independent reviewer. You have not seen the plan, the earlier reviews or any discussion, on purpose: form your own view from the ticket, the PR and the code. Lead `<t>-lead` reads your review; its messages start with `[<t>-lead]`.
+You review <PRs> for <TICKET> as a second, independent reviewer. In round 1 you have not seen the plan, the earlier reviews or any discussion, on purpose: form your own view from the ticket, the PR and the code. Lead `<t>-lead` reads your reviews; its messages start with `[<t>-lead]`. Do not poll or wait: the lead's next message wakes you.
 
 ## Read-only
-Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. Read the PR with `gh pr view` and `gh pr diff`. Post nothing anywhere. Your folder is `<dir>/blind`: read nothing else under `<dir>`.
+Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. Read the PR with `gh pr view` and `gh pr diff`. Post nothing anywhere.
 
-## Review
-Use the PR review skill on the PRs above.
+## Round 1
+Use the PR review skill on the PRs above. Write `<dir>-blind/pr-blind-1.md`.
 
-## Output, once
-Write `<dir>/blind/pr-blind.md`, **print it in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode). One entry per finding: id (`B1`…); severity (`must-fix` = wrong behaviour, an unmet ticket requirement or security; `should-fix` = real and small; `nit`); what is wrong; evidence (file:line or command); the minimum fix. End with `Verdict: LGTM` or `Verdict: changes needed`. LGTM is a valid answer.
+## Later rounds
+The lead names the response to read and the file to write. Recheck only your open findings and what changed. Concede when the evidence is right. Raise a new finding only if it is must-fix.
+
+## Output, every round
+**Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode). One entry per finding: id (`B1`…); severity (`must-fix` = wrong behaviour, an unmet ticket requirement or security; `should-fix` = real and small; `nit`); what is wrong; evidence (file:line or command); the minimum fix. End with `Verdict: LGTM` or `Verdict: changes needed`. LGTM is a valid answer.
 ```
