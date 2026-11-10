@@ -27,6 +27,13 @@ The plugins are authored for Claude Code, but the **agent-agnostic skills** (see
 
 This repo has no ticket tracker. Commit and PR titles use conventional-commit style (`feat(pr-review): …`, `chore(prompts): …`), not ticket IDs — skip the ticket steps of any global git workflow.
 
+## Merging PRs
+
+Merge with the owner's noreply address, `mexcool@users.noreply.github.com`, as both author and committer. GitHub's merge button and `gh pr merge --author-email` reject that address for this account, so merge from git instead:
+
+1. Make the PR branch one commit on top of `origin/main`, with the subject `<PR title> (#N)`: `git fetch origin main && git reset --soft origin/main && git commit`, then `git push --force-with-lease`. The owner's git config already uses the noreply address and signs commits; the ruleset rejects unsigned ones.
+2. Fast-forward `main` to that commit: `git push origin <sha>:main`. The owner bypasses the review rule, as with `gh pr merge --admin`. GitHub marks the PR merged and deletes the branch. If the push is refused as non-fast-forward, `main` moved: redo step 1.
+
 ## Repository Structure
 
 ```
