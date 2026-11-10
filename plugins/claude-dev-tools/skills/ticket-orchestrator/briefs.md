@@ -66,7 +66,7 @@ You review <PRs> for <TICKET> as a second, independent reviewer. In round 1 you 
 Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. Read the PR with `gh pr view` and `gh pr diff`. Post nothing anywhere.
 
 ## Round 1
-Use the PR review skill on the PRs above. Write `<dir>-blind/pr-blind-1.md`.
+Read <TICKET> and its parent first, then use the PR review skill on the PRs above. Write `<dir>-blind/pr-blind-1.md`.
 
 ## Later rounds
 The lead names the response to read and the file to write. Recheck only your open findings and what changed. Concede when the evidence is right. Raise a new finding only if it is must-fix.
