@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Orchestrator</title>
+<meta name="description" content="A step-through of one ticket-orchestrator run: the herdr tab, who works when, the files each agent writes, and where you step in.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: the herdr tab is the stage. A stepper drives a mock of the three-pane tab, the loop folder beside the caption fills in as files land, and reference sections follow in one column. */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunken:#E8ECF1; --fg:#141920; --muted:#5A6473; --line:#D6DCE4;
+  --lead:#4F46E5; --on-lead:#FFFFFF; --impl:#C2410C; --rev:#0F766E; --blind:#9333EA;
+  --must:#B91C1C; --should:#B45309;
+  --term:#151A21; --term-head:#1C222B; --term-line:#2A313B; --term-fg:#D8DEE6; --term-dim:#7B8593;
+  --lead-t:#A5B4FC; --impl-t:#FDBA74; --rev-t:#5EEAD4; --blind-t:#D8B4FE;
+  --must-t:#FCA5A5; --should-t:#FCD34D; --ok-t:#86EFAC;
+  --font-sans:"Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono:"Geist Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1015; --surface:#151920; --sunken:#1C212A; --fg:#E4E8EE; --muted:#97A1B0; --line:#29303B;
+    --lead:#8E95FF; --on-lead:#0D1015; --impl:#FB923C; --rev:#2DD4BF; --blind:#C084FC;
+    --must:#F87171; --should:#FBBF24;
+    --term:#0A0D11; --term-head:#11151B; --term-line:#232A33;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1015; --surface:#151920; --sunken:#1C212A; --fg:#E4E8EE; --muted:#97A1B0; --line:#29303B;
+  --lead:#8E95FF; --on-lead:#0D1015; --impl:#FB923C; --rev:#2DD4BF; --blind:#C084FC;
+  --must:#F87171; --should:#FBBF24;
+  --term:#0A0D11; --term-head:#11151B; --term-line:#232A33;
+  color-scheme:dark;
+}
+
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--lead)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:56px 72px;display:flex;flex-direction:column;gap:80px}
+h1,h2,h3{margin:0;text-wrap:balance;letter-spacing:-0.02em}
+h2{font-size:28px;line-height:1.2;font-weight:650}
+h3{font-size:19px;line-height:1.3;font-weight:600}
+p{margin:0}
+code{font-family:var(--font-mono);font-size:.88em;background:var(--sunken);padding:1px 5px;border-radius:4px}
+:focus-visible{outline:2px solid var(--lead);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:24px}
+.sec-head{display:flex;flex-direction:column;gap:8px;max-width:68ch}
+.sec-head p{color:var(--muted)}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--lead);font-weight:500}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:48px;align-items:end}
+.hero-text{display:flex;flex-direction:column;gap:16px}
+.hero h1{font-size:clamp(40px,6.4vw,68px);line-height:1;letter-spacing:-0.035em;font-weight:700}
+.lede{font-size:19px;line-height:1.5;max-width:52ch}
+.start{background:var(--term);color:var(--term-fg);border:1px solid var(--term-line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.start-label{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--term-dim)}
+.cmd{margin:0;font-family:var(--font-mono);font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word;color:var(--term-fg)}
+.cmd .p{color:var(--term-dim)}
+.start .note{color:var(--term-dim);font-size:13px;line-height:1.5}
+.start code{background:var(--term-head);color:var(--term-fg)}
+
+/* stage track */
+.track{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:12px 20px}
+.stage{flex:var(--n) 1 0;min-width:120px;display:flex;flex-direction:column;gap:8px}
+.stage-name{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.stage[data-on] .stage-name{color:var(--fg)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;border-top:2px solid var(--line);padding-top:10px}
+.stage[data-on] .dots{border-top-color:var(--lead)}
+.sd{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:500 11px/1 var(--font-mono);cursor:pointer;display:grid;place-items:center;padding:0}
+.sd:hover{border-color:var(--lead)}
+.sd[data-s="past"]{background:var(--sunken);color:var(--fg)}
+.sd[data-s="now"]{background:var(--lead);border-color:var(--lead);color:var(--on-lead)}
+
+/* herdr tab mock */
+.tab-scroll{overflow-x:auto;border-radius:12px}
+.tab{min-width:700px;background:var(--term);border:1px solid var(--term-line);border-radius:12px;overflow:hidden;color:var(--term-fg);font-family:var(--font-mono);font-size:12.5px;line-height:1.5}
+.tab-bar{display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--term-head);border-bottom:1px solid var(--term-line)}
+.tab-name{padding:2px 10px;border-radius:6px;background:var(--term);border:1px solid var(--term-line);font-weight:500}
+.tab-meta{color:var(--term-dim)}
+.tab-body{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:1px;height:340px;background:var(--term-line)}
+.col{display:flex;flex-direction:column;gap:1px;min-width:0;min-height:0}
+.pane{flex:1 1 0;min-height:0;display:flex;flex-direction:column;background:var(--term);box-shadow:inset 0 0 0 1.5px transparent;transition:box-shadow .25s}
+.pane[data-role="lead"]{--rc:var(--lead-t)}
+.pane[data-role="impl"]{--rc:var(--impl-t)}
+.pane[data-role="rev"]{--rc:var(--rev-t)}
+.pane[data-role="blind"]{--rc:var(--blind-t)}
+.pane[data-state="working"]{box-shadow:inset 0 0 0 1.5px var(--rc)}
+.pane-head{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid var(--term-line)}
+.pdot{width:8px;height:8px;border-radius:50%;background:var(--rc);flex:none}
+.pname{color:var(--rc);font-weight:600;white-space:nowrap}
+.kind{color:var(--term-dim)}
+.pstate{margin-left:auto;font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid var(--term-line);color:var(--term-dim)}
+.pane[data-state="working"] .pstate{background:var(--rc);border-color:var(--rc);color:var(--term)}
+.pane-body{padding:10px 12px;display:flex;flex-direction:column;gap:3px;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+.pane[data-state="idle"] .pane-body{opacity:.5}
+.pane[data-state="working"] .pane-body::after{content:"";width:7px;height:14px;margin-top:2px;background:var(--rc);animation:blink 1.1s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+.ln.in{color:var(--lead-t)}
+.ln.cmd{color:var(--term-fg);font-weight:500}
+.ln.must{color:var(--must-t)}
+.ln.should{color:var(--should-t)}
+.ln.dim{color:var(--term-dim)}
+.ln.ok{color:var(--ok-t)}
+
+/* caption + folder */
+.walk-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:40px;align-items:start}
+.caption{display:flex;flex-direction:column;gap:14px;padding-top:4px}
+.cap-meta{display:flex;gap:12px;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cap-meta #capStage{color:var(--lead);font-weight:500}
+.caption h3{font-size:24px;letter-spacing:-0.025em}
+#capBody{max-width:62ch}
+.cap-rows{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.cap-row{display:flex;gap:12px;align-items:baseline}
+.cap-k{width:68px;flex:none;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-size:13px}
+.chip.mono{font-family:var(--font-mono);font-size:12px}
+.chip .cd{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.none{color:var(--muted);font-size:13px}
+.controls{display:flex;gap:10px;margin-top:8px;align-items:center}
+.btn{font:500 14px/1 var(--font-sans);padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--lead)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.primary{background:var(--lead);border-color:var(--lead);color:var(--on-lead)}
+.keys{color:var(--muted);font-size:13px;margin-left:6px}
+
+.folder{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 14px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.folder-head{font-family:var(--font-mono);font-size:13px;font-weight:600;padding-left:8px}
+.tree{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px;font-family:var(--font-mono);font-size:12.5px}
+.tree .dir{color:var(--muted);padding:6px 8px 2px 18px}
+.file{display:flex;align-items:center;gap:8px;padding:2px 8px 2px 32px;border-radius:6px;color:var(--muted);opacity:.4;transition:opacity .2s,background-color .2s}
+.file[data-s="past"]{opacity:1;color:var(--fg)}
+.file[data-s="now"]{opacity:1;color:var(--fg);background:var(--sunken);font-weight:500}
+.fdot{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.fname{min-width:0;overflow-wrap:anywhere}
+.ftag{margin-left:auto;font-size:11px;color:var(--c);visibility:hidden}
+.file[data-s="now"] .ftag{visibility:visible}
+.folder-note{color:var(--muted);font-size:13px;padding-left:8px}
+
+/* cast table */
+.table-scroll{overflow-x:auto}
+.cast{width:100%;min-width:720px;border-collapse:collapse;font-size:15px}
+.cast th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:0 14px 10px 0;border-bottom:1px solid var(--line)}
+.cast td{padding:14px 14px 14px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.cast td:first-child{white-space:nowrap;font-weight:600}
+.rdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:10px;vertical-align:1px}
+.runs{font-family:var(--font-mono);font-size:13px;color:var(--muted);white-space:nowrap}
+.writes{display:flex;flex-wrap:wrap;gap:4px 6px}
+.writes code{font-size:12px}
+
+/* review round */
+.fig{margin:0;display:flex;flex-direction:column;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px}
+.fig-scroll{overflow-x:auto}
+.fig svg{display:block;width:100%;max-width:780px;min-width:600px;height:auto;margin:0 auto;color:var(--muted)}
+.fig text{font-family:var(--font-sans)}
+.fig .mono{font-family:var(--font-mono)}
+.fig .nd{fill:var(--surface);stroke-width:1.75}
+.fig .nd-soft{fill:var(--sunken);stroke:var(--line)}
+.fig .ar{stroke:currentColor;stroke-width:1.5;fill:none}
+.fig .t{fill:var(--fg);font-size:14px}
+.fig .b{font-weight:600;font-size:15px}
+.fig .sub,.fig .lbl{fill:var(--muted);font-size:12px}
+.fig figcaption{color:var(--muted);font-size:14px;max-width:72ch;margin:0 auto;text-align:center}
+.triage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tri{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:3px solid var(--c)}
+.tri-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.tri-k{font-family:var(--font-mono);font-weight:600;color:var(--c)}
+.tri-v{font-size:13px;color:var(--muted)}
+.tri p{font-size:15px}
+.aside-note{color:var(--muted);font-size:15px;max-width:72ch}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 40px}
+.rule{display:flex;flex-direction:column;gap:6px;min-width:0}
+.rule p{color:var(--muted);max-width:60ch}
+
+.foot{color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:20px}
+
+@media (max-width:860px){
+  .hero,.walk-grid{grid-template-columns:1fr}
+  .hero{gap:28px}
+  .walk-grid{gap:28px}
+  .rules,.triage{grid-template-columns:1fr}
+  .wrap{gap:64px;padding-block:36px 56px}
+}
+@media (prefers-reduced-motion:reduce){
+  .pane,.file{transition:none}
+  .pane[data-state="working"] .pane-body::after{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">claude-dev-tools · skill</p>
+    <h1>Ticket orchestrator</h1>
+    <p class="lede">One ticket, one worktree, one herdr tab. A Claude lead passes files between a Claude implementer and Codex reviewers, sorts what the reviewers find, and comes back to you only for the steps that need a person.</p>
+  </div>
+  <div class="start">
+    <div class="start-label">How a run starts</div>
+    <pre class="cmd"><span class="p">$</span> claude --worktree -n proj-123-lead
+<span class="p">&gt;</span> orchestrate PROJ-123</pre>
+    <p class="note">Needs herdr. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed.</p>
+  </div>
+</header>
+
+<section aria-labelledby="walk-h">
+  <div class="sec-head">
+    <h2 id="walk-h">One run, step by step</h2>
+    <p>Click through a run of PROJ-123. The tab shows which agents are working. The loop folder marks each file as it is written.</p>
+  </div>
+  <ol class="track" id="track" aria-label="Steps"></ol>
+  <div class="tab-scroll">
+    <div class="tab">
+      <div class="tab-bar"><span class="tab-name">proj-123</span><span class="tab-meta">herdr tab · all panes in the lead's worktree</span></div>
+      <div class="tab-body">
+        <div class="col" data-col="lead">
+          <div class="pane" data-role="lead"><div class="pane-head"><span class="pdot"></span><span class="pname">proj-123-lead</span><span class="kind">Claude</span><span class="pstate"></span></div><div class="pane-body"></div></div>
+        </div>
+        <div class="col" data-col="impl">
+          <div class="pane" data-role="impl"><div class="pane-head"><span class="pdot"></span><span class="pname">proj-123-impl</span><span class="kind">Claude</span><span class="pstate"></span></div><div class="pane-body"></div></div>
+        </div>
+        <div class="col" data-col="rev">
+          <div class="pane" data-role="rev"><div class="pane-head"><span class="pdot"></span><span class="pname">proj-123-rev</span><span class="kind">Codex</span><span class="pstate"></span></div><div class="pane-body"></div></div>
+          <div class="pane" data-role="blind"><div class="pane-head"><span class="pdot"></span><span class="pname">proj-123-blind</span><span class="kind">Codex</span><span class="pstate"></span></div><div class="pane-body"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="walk-grid">
+    <div class="caption" aria-live="polite">
+      <div class="cap-meta"><span id="capStage"></span><span id="capCount"></span></div>
+      <h3 id="capTitle"></h3>
+      <p id="capBody"></p>
+      <div class="cap-rows">
+        <div class="cap-row"><span class="cap-k">Active</span><span class="chips" id="capWho"></span></div>
+        <div class="cap-row"><span class="cap-k">Writes</span><span class="chips" id="capFiles"></span></div>
+      </div>
+      <div class="controls">
+        <button type="button" class="btn" id="prev">Back</button>
+        <button type="button" class="btn primary" id="next">Next</button>
+        <span class="keys">or ← →</span>
+      </div>
+    </div>
+    <aside class="folder" aria-label="Loop folder">
+      <div class="folder-head">~/ticket-orchestrator/</div>
+      <ul class="tree" id="tree"></ul>
+      <p class="folder-note">Listed in the order they are written. The dot shows who writes each one.</p>
+    </aside>
+  </div>
+</section>
+
+<section aria-labelledby="cast-h">
+  <div class="sec-head">
+    <h2 id="cast-h">Who does what</h2>
+    <p>Each agent has one name everywhere: the herdr pane, the herdr agent, and the session title in the Claude Code and Codex apps. That is how you follow along without sitting at the tab.</p>
+  </div>
+  <div class="table-scroll">
+    <table class="cast">
+      <thead><tr><th>Role</th><th>Runs as</th><th>Writes</th><th>Rule it keeps</th></tr></thead>
+      <tbody>
+        <tr style="--c:var(--fg)"><td><span class="rdot"></span>You</td><td class="runs">the lead's chat</td><td>yes or no</td><td>Merge, apply, deploy, test pages and product calls wait for you.</td></tr>
+        <tr style="--c:var(--lead)"><td><span class="rdot"></span>Lead</td><td class="runs">Claude · proj-123-lead</td><td><span class="writes"><code>log.md</code><code>brief-*.md</code><code>lead-*-N.md</code></span></td><td>Relays, sorts and decides. Never implements or reviews.</td></tr>
+        <tr style="--c:var(--impl)"><td><span class="rdot"></span>Implementer</td><td class="runs">Claude · proj-123-impl</td><td><span class="writes"><code>ticket-kickoff.md</code><code>*-response-N.md</code><code>pr-ready.md</code><code>ops-N.md</code></span></td><td>The only agent that changes the worktree. Makes the smallest change that meets the ticket.</td></tr>
+        <tr style="--c:var(--rev)"><td><span class="rdot"></span>Reviewer</td><td class="runs">Codex · proj-123-rev</td><td><span class="writes"><code>prep.md</code><code>kickoff-review-N.md</code><code>pr-review-N.md</code></span></td><td>Read-only and posts nothing. Reviews the kickoff, then the PR.</td></tr>
+        <tr style="--c:var(--blind)"><td><span class="rdot"></span>Blind reviewer</td><td class="runs">Codex · proj-123-blind</td><td><span class="writes"><code>pr-blind-N.md</code></span></td><td>Joins at the PR stage. Its first round sees only the ticket and the PR.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section aria-labelledby="round-h">
+  <div class="sec-head">
+    <h2 id="round-h">One review round</h2>
+    <p>The kickoff and the PR go through the same round. The lead sits in the middle, so every finding passes its sort before the implementer sees it.</p>
+  </div>
+  <figure class="fig">
+    <div class="fig-scroll">
+      <svg viewBox="0 0 780 272" role="img" aria-label="A review round: the reviewer writes a review file, the lead sorts it and logs what it drops, the implementer answers in a response file, and the reviewer rechecks until LGTM ends the stage.">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+        </defs>
+        <rect class="nd-soft" x="20" y="20" width="170" height="40" rx="20"/>
+        <text class="t" x="105" y="45" text-anchor="middle">stage ends</text>
+        <line class="ar" x1="105" y1="112" x2="105" y2="63" marker-end="url(#ah)"/>
+        <text class="lbl" x="114" y="92">LGTM</text>
+
+        <rect class="nd-soft" x="330" y="20" width="120" height="40" rx="8"/>
+        <text class="t mono" x="390" y="45" text-anchor="middle">log.md</text>
+        <line class="ar" x1="390" y1="112" x2="390" y2="63" marker-end="url(#ah)"/>
+        <text class="lbl" x="399" y="92">drops</text>
+
+        <rect class="nd" style="stroke:var(--rev)" x="20" y="112" width="170" height="64" rx="10"/>
+        <text class="t b" x="105" y="140" text-anchor="middle">Reviewer</text>
+        <text class="sub" x="105" y="160" text-anchor="middle">finds, then rechecks</text>
+
+        <rect class="nd" style="stroke:var(--lead)" x="305" y="112" width="170" height="64" rx="10"/>
+        <text class="t b" x="390" y="140" text-anchor="middle">Lead</text>
+        <text class="sub" x="390" y="160" text-anchor="middle">sorts every finding</text>
+
+        <rect class="nd" style="stroke:var(--impl)" x="590" y="112" width="170" height="64" rx="10"/>
+        <text class="t b" x="675" y="140" text-anchor="middle">Implementer</text>
+        <text class="sub" x="675" y="160" text-anchor="middle">accepts or pushes back</text>
+
+        <line class="ar" x1="190" y1="144" x2="302" y2="144" marker-end="url(#ah)"/>
+        <text class="lbl mono" x="246" y="134" text-anchor="middle">*-review-N.md</text>
+
+        <line class="ar" x1="475" y1="144" x2="587" y2="144" marker-end="url(#ah)"/>
+        <text class="lbl mono" x="531" y="134" text-anchor="middle">lead-*-N.md</text>
+        <text class="lbl" x="531" y="164" text-anchor="middle">must + should</text>
+
+        <path class="ar" d="M675 176V228H105V179" marker-end="url(#ah)"/>
+        <text class="lbl mono" x="390" y="250" text-anchor="middle">*-response-N.md, then the next round</text>
+      </svg>
+    </div>
+    <figcaption>A stage ends at LGTM, at a round with nothing to relay, or when a point comes back without new evidence. Each disagreement gets one exchange, then the lead decides. At the PR stage both reviewers write a file each round, and the lead relays once both are in.</figcaption>
+  </figure>
+  <div class="triage">
+    <div class="tri" style="--c:var(--must)"><div class="tri-h"><span class="tri-k">must-fix</span><span class="tri-v">relayed</span></div><p>Wrong behaviour, a ticket requirement not met, or a security problem.</p></div>
+    <div class="tri" style="--c:var(--should)"><div class="tri-h"><span class="tri-k">should-fix</span><span class="tri-v">relayed if small</span></div><p>Real and small, and inside the contract the kickoff agreed.</p></div>
+    <div class="tri" style="--c:var(--muted)"><div class="tri-h"><span class="tri-k">drop</span><span class="tri-v">logged</span></div><p>Nits, style, “you could also”, edge cases that cannot happen, new abstractions, extra docs or tests.</p></div>
+  </div>
+  <p class="aside-note">The lead never drops a finding only because it contradicts the ticket, the contract or an earlier decision. It needs evidence to drop one, and a product question goes to you.</p>
+</section>
+
+<section aria-labelledby="rules-h">
+  <div class="sec-head">
+    <h2 id="rules-h">Why nobody watches the panes</h2>
+  </div>
+  <div class="rules">
+    <div class="rule"><h3>Every handoff is a file</h3><p>Each message from the lead names the file to write. The worker also prints it word for word in its chat, so you can read along in the apps, or catch up later from <code>log.md</code>.</p></div>
+    <div class="rule"><h3>Workers talk only to the lead</h3><p>No worker messages another. Every finding goes through the lead's sort before it reaches the implementer, which is what keeps scope from growing each round.</p></div>
+    <div class="rule"><h3>herdr wakes the lead</h3><p>The lead sends with <code>herdr agent prompt &lt;worker&gt; "…" --wait</code> in the background and ends its turn. The call returns when the worker's turn ends. The lead then looks for the file, since herdr reads agent state from the screen. No file yet means a two-minute grace window, then a look at the pane.</p></div>
+    <div class="rule"><h3>No dialogs in any pane</h3><p>A pane with an open dialog cannot take a prompt, so the loop would stall until you came back. Workers write their questions into their files instead.</p></div>
+  </div>
+</section>
+
+<footer class="foot">Matches the skill as of claude-dev-tools 1.5.3. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
+
+</div>
+
+<script>
+(() => {
+  const COLOR = {lead:'var(--lead)', impl:'var(--impl)', rev:'var(--rev)', blind:'var(--blind)', you:'var(--fg)'};
+  const LABEL = {lead:'Lead', impl:'Implementer', rev:'Reviewer', blind:'Blind reviewer', you:'You'};
+  const STAGES = ['Setup', 'Kickoff', 'Build', 'PR review', 'Ship'];
+  const W = (...l) => ({s:'working', l});
+  const I = (...l) => ({s:'idle', l});
+
+  const STEPS = [
+    {st:0, t:'You start the lead', who:['you','lead'], files:[],
+     b:'Start Claude in a fresh worktree under the lead’s name, then name the ticket. After that you only answer product questions and give the final yes.',
+     p:{lead:W('$ claude --worktree -n proj-123-lead', '> orchestrate PROJ-123')}},
+    {st:0, t:'The lead sets up the run', who:['lead'], files:['log.md'],
+     b:'It checks that it is in its own clean worktree and that the plan has usage left. It makes the loop folder and a log, assigns the ticket to you and moves it to In Progress. Then it splits the tab into three columns and starts Claude in the middle and Codex on the right, all in the same worktree.',
+     p:{lead:W('worktree is clean ✓', 'usage limits ok ✓', 'PROJ-123 → In Progress', 'split tab, start workers'), impl:I('Claude Code', 'waiting for a prompt'), rev:I('Codex', 'waiting for a prompt')}},
+    {st:0, t:'Briefs go out', who:['lead'], files:['brief-impl.md','brief-rev.md'],
+     b:'The lead writes one brief per worker, with literal paths and names. It sends each worker a one-line prompt in the background and ends its turn. herdr wakes it when a worker’s turn ends.',
+     p:{lead:W('wrote brief-impl.md', 'wrote brief-rev.md', '→ impl, → rev', 'waiting on herdr'), impl:W('[proj-123-lead] Read brief-impl.md', 'reading the brief'), rev:W('[proj-123-lead] Read brief-rev.md', 'reading the brief')}},
+    {st:1, t:'Kickoff and prep, side by side', who:['impl','rev'], files:['prep.md','ticket-kickoff.md'],
+     b:'The implementer runs the ticket kickoff skill: the ticket, its parent and related tickets, the code and recent PRs. No code yet. The kickoff ends with a Contract that lists the files it will change, the rough diff size, the Done-when items this PR closes, and what is out of scope. Meanwhile the reviewer reads the ticket and the code on its own, so it has a view before it sees the plan.',
+     p:{lead:I('waiting on impl and rev'), impl:W('running ticket kickoff skill', 'reading ticket, code, PRs', 'wrote ticket-kickoff.md', '## Contract'), rev:W('prep: ticket and code first', 'wrote prep.md')}},
+    {st:1, t:'The reviewer checks the plan', who:['rev'], files:['kickoff-review-1.md'],
+     b:'The reviewer runs the kickoff review skill on ticket-kickoff.md. Every finding gets an id, a severity, evidence and the smallest fix. The file ends with a verdict.',
+     p:{lead:I('→ rev: review the kickoff'), impl:I('turn ended'), rev:W('[proj-123-lead] Review ticket-kickoff.md', 'K1 must-fix  a Done-when item is not covered', 'K2 should-fix  reuse the existing helper', 'K3 nit  naming', 'Verdict: changes needed')}},
+    {st:1, t:'The lead sorts every finding', who:['lead'], files:['lead-kickoff-1.md'],
+     b:'This is where scope stays small. Must-fix findings go to the implementer. A should-fix goes only if it is small and inside the contract. Nits, style points and “you could also” ideas are dropped and written in the log.',
+     p:{lead:W('lead-kickoff-1.md', 'K1 must-fix → relay', 'K2 should-fix → relay', 'K3 nit → drop, logged'), impl:I('turn ended'), rev:I('turn ended')}},
+    {st:1, t:'The implementer answers', who:['impl'], files:['kickoff-response-1.md'],
+     b:'It updates the kickoff in place and answers each finding. Accepted means it says what changed. Push back means it shows evidence, such as a file and line, command output or the ticket text. Pushing back is normal.',
+     p:{lead:I('waiting on impl'), impl:W('[proj-123-lead] Answer lead-kickoff-1.md', 'K1 accepted, Contract updated', 'K2 push back, evidence: file:line', 'wrote kickoff-response-1.md'), rev:I('turn ended')}},
+    {st:1, t:'Round two, then agreement', who:['rev','lead'], files:['kickoff-review-2.md'],
+     b:'The reviewer rechecks only its open findings and what changed, and raises a new finding only if it is must-fix. Each disagreement gets one exchange, then the lead decides. When both workers agree, the lead tells you. You have no plan to approve. The lead also decides now whether a blind reviewer joins at the PR stage. It does, unless the change is only docs or only tests.',
+     p:{lead:W('kickoff agreed, telling you', 'blind reviewer: on'), impl:I('turn ended'), rev:W('K1 resolved ✓', 'K2 conceded ✓', 'Verdict: LGTM')}},
+    {st:2, t:'Build, open the PR, get CI green', who:['impl'], files:['pr-ready.md'],
+     b:'Only the implementer changes the worktree. It branches from the latest origin/main, writes the code, opens the PR ready for review and waits for green CI. pr-ready.md holds the links, the validation output, and any difference from the contract with the reason.',
+     p:{lead:I('waiting on impl'), impl:W('[proj-123-lead] Kickoff agreed. Build it.', '$ git switch -c feat/proj-123', '$ gh pr create', 'CI green ✓', 'wrote pr-ready.md'), rev:I('turn ended')}},
+    {st:3, t:'A blind reviewer joins', who:['lead','blind'], files:['blind/brief-blind.md'],
+     b:'The lead splits the reviewer’s pane and starts a second Codex. It gets its own folder and a brief with no path to the plan, so its first round comes from the ticket and the PR alone. It is a second opinion that was never anchored on the kickoff.',
+     p:{lead:W('split rev pane down', 'start proj-123-blind', 'wrote brief-blind.md'), impl:I('turn ended'), rev:I('turn ended'), blind:W('[proj-123-lead] Read brief-blind.md', 'reading PROJ-123 and its parent')}},
+    {st:3, t:'Two PR reviews', who:['rev','blind'], files:['pr-review-1.md','blind/pr-blind-1.md'],
+     b:'Both run the PR review skill. The reviewer also checks the PR against the agreed kickoff, looking for anything agreed but missing and anything built but not agreed. The blind reviewer works from the ticket, the PR and the code.',
+     p:{lead:I('waiting on rev and blind'), impl:I('turn ended'), rev:W('running PR review skill', 'P1 should-fix  missing error path', 'Verdict: changes needed'), blind:W('running PR review skill', 'B1 must-fix  wrong default', 'Verdict: changes needed')}},
+    {st:3, t:'Sort, answer, repeat', who:['lead','impl'], files:['lead-pr-1.md','pr-response-1.md'],
+     b:'Same loop as the kickoff. The lead relays once per round, after both reviews are in, and stops sending rounds to a reviewer with no open findings. The stage ends when both reviewers are done. If it reaches round three, the lead logs why and tells you.',
+     p:{lead:W('lead-pr-1.md', 'P1 should-fix → relay', 'B1 must-fix → relay'), impl:W('P1 accepted, fix pushed', 'B1 accepted, fix pushed', 'CI green ✓', 'wrote pr-response-1.md'), rev:I('turn ended'), blind:I('turn ended')}},
+    {st:4, t:'Merge, after your yes', who:['you','lead','impl'], files:['lead-ops-1.md','ops-1.md'],
+     b:'The lead reads the PR diff itself and checks it against the contract, because a reviewer’s LGTM does not replace its own read. Then it asks you. After your yes, it gives the implementer an ops file with stop conditions. The merge is pinned to the reviewed commit, and the implementer stops at the first failure and reports back.',
+     p:{lead:W('gh pr diff matches contract ✓', 'Merge the PR? waiting for you', '> yes', 'wrote lead-ops-1.md'), impl:W('$ gh pr merge --squash \\', '    --match-head-commit <sha>', 'merged ✓', 'wrote ops-1.md'), rev:I('turn ended'), blind:I('turn ended')}},
+    {st:4, t:'Wrap up', who:['lead'], files:[],
+     b:'The lead stops its background waits and closes the worker panes. Their sessions stay on disk. If the proof needs time, such as a week of data, it schedules a follow-up check. You get the result and the open items.',
+     p:{lead:W('stop background waits', 'close worker panes', 'follow-up check, if needed', 'result and open items ✓')}}
+  ];
+
+  const TREE = [
+    {dir:'PROJ-123/'},
+    ['log.md','lead'], ['brief-impl.md','lead'], ['brief-rev.md','lead'], ['prep.md','rev'],
+    ['ticket-kickoff.md','impl'], ['kickoff-review-1.md','rev'], ['lead-kickoff-1.md','lead'],
+    ['kickoff-response-1.md','impl'], ['kickoff-review-2.md','rev'], ['pr-ready.md','impl'],
+    ['pr-review-1.md','rev'], ['lead-pr-1.md','lead'], ['pr-response-1.md','impl'],
+    ['lead-ops-1.md','lead'], ['ops-1.md','impl'],
+    {dir:'PROJ-123-blind/'},
+    ['blind/brief-blind.md','lead'], ['blind/pr-blind-1.md','blind']
+  ];
+
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const shortName = key => key.replace(/^blind\//, '');
+
+  const first = {};
+  STEPS.forEach((s, i) => s.files.forEach(f => { if (!(f in first)) first[f] = i; }));
+
+  // stage track
+  const track = $('track'), dots = [];
+  STAGES.forEach((name, si) => {
+    const idx = STEPS.map((s, i) => s.st === si ? i : -1).filter(i => i >= 0);
+    const li = el('li', 'stage');
+    li.dataset.stage = si;
+    li.style.setProperty('--n', idx.length);
+    const d = el('span', 'dots');
+    idx.forEach(i => {
+      const b = el('button', 'sd', String(i + 1));
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Step ' + (i + 1) + ': ' + STEPS[i].t);
+      b.addEventListener('click', () => go(i));
+      d.append(b);
+      dots[i] = b;
+    });
+    li.append(el('span', 'stage-name', name), d);
+    track.append(li);
+  });
+
+  // loop folder
+  const tree = $('tree'), fileEls = {}, writer = {};
+  TREE.forEach(e => {
+    if (e.dir) { tree.append(el('li', 'dir', e.dir)); return; }
+    const [key, by] = e;
+    writer[key] = by;
+    const li = el('li', 'file');
+    li.style.setProperty('--c', COLOR[by]);
+    li.title = 'Written by ' + LABEL[by];
+    li.append(el('span', 'fdot'), el('span', 'fname', shortName(key)), el('span', 'ftag', 'new'));
+    fileEls[key] = li;
+    tree.append(li);
+  });
+
+  // panes
+  const panes = {};
+  ['lead', 'impl', 'rev', 'blind'].forEach(r => {
+    const p = document.querySelector('.pane[data-role="' + r + '"]');
+    panes[r] = {el:p, body:p.querySelector('.pane-body'), state:p.querySelector('.pstate')};
+  });
+  const cols = {impl:document.querySelector('[data-col="impl"]'), rev:document.querySelector('[data-col="rev"]')};
+
+  const lineClass = t =>
+    t.startsWith('[proj-123-lead]') ? 'in' :
+    /^[$>] /.test(t) ? 'cmd' :
+    /must-fix/.test(t) ? 'must' :
+    /should-fix/.test(t) ? 'should' :
+    /\bnit\b|^→|waiting|turn ended/.test(t) ? 'dim' :
+    /LGTM|✓/.test(t) ? 'ok' : '';
+
+  const chip = (label, color, mono) => {
+    const c = el('span', 'chip' + (mono ? ' mono' : ''));
+    c.style.setProperty('--c', color);
+    c.append(el('span', 'cd'), document.createTextNode(label));
+    return c;
+  };
+
+  let cur = 0;
+  const last = STEPS.length - 1;
+  const prev = $('prev'), next = $('next');
+
+  function go(i) {
+    if (i < 0 || i > last) return;
+    cur = i;
+    render();
+  }
+
+  function render() {
+    const s = STEPS[cur];
+    dots.forEach((b, i) => {
+      b.dataset.s = i < cur ? 'past' : i === cur ? 'now' : 'future';
+      if (i === cur) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    });
+    track.querySelectorAll('.stage').forEach(li => li.toggleAttribute('data-on', Number(li.dataset.stage) === s.st));
+
+    cols.impl.hidden = !s.p.impl;
+    cols.rev.hidden = !s.p.rev;
+    for (const r in panes) {
+      const p = s.p[r], P = panes[r];
+      P.el.hidden = !p;
+      if (!p) continue;
+      P.el.dataset.state = p.s;
+      P.state.textContent = p.s;
+      P.body.replaceChildren(...p.l.map(t => el('div', 'ln ' + lineClass(t), t)));
+    }
+
+    $('capStage').textContent = STAGES[s.st];
+    $('capCount').textContent = 'Step ' + (cur + 1) + ' of ' + STEPS.length;
+    $('capTitle').textContent = s.t;
+    $('capBody').textContent = s.b;
+    $('capWho').replaceChildren(...s.who.map(r => chip(LABEL[r], COLOR[r])));
+    $('capFiles').replaceChildren(...(s.files.length
+      ? s.files.map(f => chip(shortName(f), COLOR[writer[f]], true))
+      : [el('span', 'none', 'nothing new')]));
+
+    for (const k in fileEls) {
+      const f = first[k];
+      fileEls[k].dataset.s = f === undefined || f > cur ? 'future' : s.files.includes(k) ? 'now' : 'past';
+    }
+
+    prev.disabled = cur === 0;
+    next.textContent = cur === last ? 'Start over' : 'Next';
+  }
+
+  prev.addEventListener('click', () => go(cur - 1));
+  next.addEventListener('click', () => go(cur === last ? 0 : cur + 1));
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (e.key === 'ArrowRight') go(cur + 1);
+    else if (e.key === 'ArrowLeft') go(cur - 1);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

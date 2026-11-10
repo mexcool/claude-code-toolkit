@@ -20,6 +20,8 @@ The **Codex** column marks plugins whose skills are agent-agnostic and exported 
 
 `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams); `obsidian-helper` / `pastila` ship slash-commands, not skills — so neither is exported to Codex.
 
+To see how a `ticket-orchestrator` run works, step through [the explainer](https://mexcool.github.io/claude-code-toolkit/ticket-orchestrator.html).
+
 ## Installation
 
 ### Claude Code
