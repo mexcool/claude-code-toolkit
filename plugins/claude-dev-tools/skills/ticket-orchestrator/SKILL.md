@@ -22,8 +22,9 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 0. **You must be in your own worktree.** `git rev-parse --git-dir` must differ from `git rev-parse --git-common-dir`, and `git status` must be clean. If not, stop and ask the user to start you with `claude --worktree` (or their alias for it). The implementer makes branches in this checkout.
 1. Check the usage limits (`claude-limits`). Do not spawn into paid overage without asking.
 2. Make the folder `~/ticket-orchestrator/<TICKET>/` and start `log.md`: one line per event, time from `date -u`. The user catches up from it.
-3. Name yourself: `herdr agent rename <your-pane> <t>-lead`, and `herdr tab rename` the tab to `<t>`. The user starts you with `-n <t>-lead`, or you `/rename` (Gotchas).
-4. Three equal columns in your tab, all in **your worktree**. The workers do not make their own.
+3. **Claim the ticket:** assign it to the user and set it In Progress, unless it already is. Log it.
+4. Name yourself: `herdr agent rename <your-pane> <t>-lead`, and `herdr tab rename` the tab to `<t>`. The user starts you with `-n <t>-lead`, or you `/rename` (Gotchas).
+5. Three equal columns in your tab, all in **your worktree**. The workers do not make their own.
 
    ```bash
    herdr pane split <lead-pane> --direction right --cwd <worktree> --no-focus    # → impl pane
@@ -37,7 +38,7 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
    ```
 
    `<claude-cmd>` is `$ORCH_CLAUDE_CMD` if it is set (the user's bypass alias), else `claude --dangerously-skip-permissions`. `<codex-cmd>` is `$ORCH_CODEX_CMD`, else `codex --dangerously-bypass-approvals-and-sandbox`. Read the variables with `echo`, then pass the literal text. The pane's interactive shell expands the aliases.
-5. Write `brief-impl.md` and `brief-rev.md` from [briefs.md](briefs.md), with literal paths and names. Send each one line, as in Protocol: the implementer starts the kickoff. The reviewer starts **prep**: it reads the ticket and the code before it sees the plan, so it has its own view, and writes `prep.md`.
+6. Write `brief-impl.md` and `brief-rev.md` from [briefs.md](briefs.md), with literal paths and names. Send each one line, as in Protocol: the implementer starts the kickoff. The reviewer starts **prep**: it reads the ticket and the code before it sees the plan, so it has its own view, and writes `prep.md`.
 
 ## Protocol
 
@@ -61,7 +62,7 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 3. **Later rounds:** the reviewer rechecks only its open findings and what changed. It raises a new finding only if it is must-fix. Allow one exchange per disagreement. After that, decide from the ticket and the code.
 4. **When a stage ends:** at LGTM, at a round with nothing to relay, or when a point comes back without new evidence. There is no hard limit. If a stage reaches round 3, log why and tell the user.
 5. **User decisions that add scope** go out with your next relay, not in the middle of a review, so the reviewer reviews one version.
-6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user, and set the ticket in progress if that is their workflow. Decide the blind review now, before any code exists, and log it. It is on by default: skip it only for a trivial PR that nothing outside the diff reads (one value, tests only). You settled the disputes, so after a clean review you are the worst judge of whether the PR needs fresh eyes. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, validation output, any difference from the contract and why).
+6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user. Decide the blind review now, before any code exists, and log it. It is on by default: skip it only for a trivial PR that nothing outside the diff reads (one value, tests only). You settled the disputes, so after a clean review you are the worst judge of whether the PR needs fresh eyes. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, validation output, any difference from the contract and why).
 7. **PR review:** the same loop with `pr-review-N.md`, `lead-pr-N.md` and `pr-response-N.md`. The reviewer also checks the PR against the agreed kickoff: anything agreed but missing, anything built but not agreed.
 8. **Blind review**, unless you skipped it at step 6. When `pr-ready.md` lands, write `blind/brief-blind.md` from [briefs.md](briefs.md). Split the reviewer's pane down (`--direction down`), start `<codex-cmd>`, name it `<t>-blind` as in Setup, and send it the brief together with the reviewer's round 1. It works in `blind/` and reads nothing else in the folder. Wait for both files, then sort them into one `lead-pr-1.md`. Close the blind pane: it does one round, and the reviewer rechecks the fixes.
 9. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.

@@ -1,6 +1,6 @@
 {
   "name": "claude-dev-tools",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "Context optimization and continuous learning tools for Claude Code development",
   "author": {
     "name": "mexcool"
