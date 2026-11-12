@@ -17,8 +17,8 @@ The user gave you a PR (URL or number). Do a principal-engineer review, not a di
    - **Test the property from each side the PR has**:
      - **Inputs**: for each value a rule reads, its unit and bound. Check both failure directions: the rule lets through what it must stop, and it stops what it must let through.
      - **Removed code**: what each deleted path guaranteed on failure, and where the new code keeps that guarantee.
-     - **Accepted limits**: who can trigger each one — only an infra failure, or any caller.
-     - **Outputs**: every consumer of each new or changed contract (error code, field, event, metric), and whether it can still tell the cases apart.
+     - **Accepted limits and temporary states**: who can trigger each one — only an infra failure, or any caller — and how long it lasts, worked out from the PR's own numbers. Follow a repeated call (a poll, a retry) past its first request.
+     - **Outputs**: every consumer of each new or changed contract (error code, field, event, metric) or behaviour (when a value now appears, when a metric now fires), and whether it can still tell the cases apart. Search the whole repo, not the diff: alert rules, dashboards, clients, CI.
    - Real issues only: correctness, design, integration, missed cases, hidden coupling, wrong abstraction level.
    - **No nitpicks**: no style, no naming preferences, no "you could also..." that adds nothing.
    - Flag over-engineering — in both the PR *and* any fix you propose. The simplest correct change wins.
