@@ -7,7 +7,7 @@ description: Review a ticket kickoff or implementation plan written by another a
 
 The user pasted a kickoff for a ticket, written by another agent. Review it before any code is written. Read the ticket (Linear MCP) and the code yourself; don't just trust the paste. Main moves fast: fetch, review against the latest `origin/main`, and say which commit.
 
-- Focus on simplicity: the simplest plan that does what the ticket needs. Flag scope creep and overengineering, including in your own suggestions.
+- Focus on simplicity: the simplest plan that reaches the outcome behind the ticket, which may not be the ticket's own route. Flag scope creep and overengineering, including in your own suggestions.
 - Check the board and open PRs: does anything need to land first, or will something collide?
 - If the kickoff reinterprets the ticket, check that against what the product does, not only what the code allows.
 - You review; the other agent implements. Don't edit code or touch tickets or PRs.

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Be More Ambitious</title>
+<meta name="description" content="Three ways to be more ambitious with a model without growing the change: altitude, depth and range, with prompts to copy and examples.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a field reference card. Header with an axis diagram (the diff at the origin), three move cards, the outside-judge band, then two lookup tables and the traps. */
+:root {
+  --bg: #F2F5F7;
+  --surface: #FFFFFF;
+  --ink: #14212B;
+  --muted: #56687A;
+  --rule: #D5DDE4;
+  --code-bg: #ECF0F3;
+  --alt: #2463A8;
+  --dep: #5B3FB4;
+  --rng: #A3610C;
+  --judge: #1D7656;
+  --font-body: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1317; --surface: #151C22; --ink: #E3EAF0; --muted: #93A4B2; --rule: #28343D; --code-bg: #1B242B;
+    --alt: #7DB1E8; --dep: #AD9FF6; --rng: #E3AB5C; --judge: #5FC99F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1317; --surface: #151C22; --ink: #E3EAF0; --muted: #93A4B2; --rule: #28343D; --code-bg: #1B242B;
+  --alt: #7DB1E8; --dep: #AD9FF6; --rng: #E3AB5C; --judge: #5FC99F;
+  color-scheme: dark;
+}
+
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.page {
+  max-width: 1080px; margin: 0 auto;
+  padding-block: 40px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 40px;
+}
+a { color: inherit; text-underline-offset: 2px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+
+/* Header */
+header { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; align-items: center; }
+@media (max-width: 760px) { header { grid-template-columns: minmax(0, 1fr); } }
+.eyebrow { font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1 { font-size: clamp(34px, 5.4vw, 52px); line-height: 1.02; letter-spacing: -.025em; font-weight: 700; margin: 10px 0 14px; }
+.lede { font-size: 17px; max-width: 58ch; }
+.src { font-size: 13px; color: var(--muted); margin-top: 14px; }
+svg.axis { width: 100%; max-width: 300px; height: auto; justify-self: center; }
+.axis text { font-family: var(--font-body); fill: var(--muted); font-size: 11px; }
+.axis .k { font-weight: 700; letter-spacing: .07em; font-size: 11px; }
+.axis .k.alt { fill: var(--alt); } .axis .k.dep { fill: var(--dep); } .axis .k.rng { fill: var(--rng); }
+.axis .ln-alt { stroke: var(--alt); } .axis .ln-dep { stroke: var(--dep); } .axis .ln-rng { stroke: var(--rng); }
+.axis .hd-alt { fill: var(--alt); } .axis .hd-dep { fill: var(--dep); } .axis .hd-rng { fill: var(--rng); }
+.axis .diff { fill: var(--surface); stroke: var(--ink); }
+.axis .diff-t { fill: var(--ink); font-family: var(--font-mono); font-size: 10px; }
+
+/* Section headings */
+.sec-h { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.sec-h h2 { font-size: 20px; letter-spacing: -.01em; }
+.sec-h p { color: var(--muted); font-size: 14px; max-width: 70ch; }
+
+/* Move cards */
+.moves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 920px) { .moves { grid-template-columns: minmax(0, 1fr); } }
+.move { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.move h3 { font-size: 22px; letter-spacing: -.015em; display: flex; align-items: baseline; gap: 10px; color: var(--c); }
+.move h3 .glyph { font-size: 20px; }
+.move h3 .cmd { margin-left: auto; font: 500 12px var(--font-mono); letter-spacing: 0; color: var(--muted); background: var(--code-bg); padding: 2px 8px; border-radius: 6px; }
+.move .what { font-weight: 500; }
+.field { display: flex; flex-direction: column; gap: 3px; }
+.label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.field p { font-size: 14px; }
+.extra { font-size: 13px; color: var(--muted); }
+
+/* Prompt boxes */
+.prompt { background: var(--code-bg); border-radius: 8px; padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.prompt-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.prompt-h .label { color: var(--c, var(--muted)); }
+.prompt-t { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; overflow-wrap: anywhere; }
+button.copy { font: 600 12px var(--font-body); color: var(--muted); background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+button.copy:hover { color: var(--ink); border-color: var(--muted); }
+button.copy:focus-visible { outline: 2px solid var(--c, var(--ink)); outline-offset: 2px; }
+
+/* Judge band */
+.judge { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 22px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 24px; align-items: start; --c: var(--judge); }
+@media (max-width: 760px) { .judge { grid-template-columns: minmax(0, 1fr); } }
+.judge h2 { font-size: 22px; color: var(--judge); letter-spacing: -.015em; margin-bottom: 8px; }
+.judge .body { display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--rule); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--code-bg); }
+td.task { font-weight: 600; white-space: nowrap; }
+td.shallow { color: var(--muted); }
+th.deep { color: var(--dep); }
+th.borrow { color: var(--rng); }
+.depth-tbl table { min-width: 720px; }
+.depth-tbl td.task { width: 18%; }
+.depth-tbl td.shallow { width: 30%; }
+
+.lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 860px) { .lower { grid-template-columns: minmax(0, 1fr); } }
+.range-tbl table { min-width: 420px; }
+.range-tbl td:first-child { width: 42%; font-weight: 500; }
+
+.traps { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.traps li { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; font-size: 14px; }
+.traps strong { display: block; margin-bottom: 2px; }
+
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 16px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div>
+    <div class="eyebrow">Altitude · Depth · Range</div>
+    <h1>Be more ambitious</h1>
+    <p class="lede">Three ways to be more ambitious with a model without growing the change. Put the ambition into evidence and into questions for you. Keep the diff as small as the problem allows.</p>
+    <p class="src">After Felix Rieseberg, <a href="https://felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/">How to be more ambitious</a> (October 2026).</p>
+  </div>
+  <svg class="axis" viewBox="0 0 300 250" role="img" aria-label="The diff sits at the center. Altitude points up to the outcome, depth points down to the evidence, range points sideways to other fields.">
+    <line class="ln-alt" x1="150" y1="100" x2="150" y2="40" stroke-width="2"/>
+    <polygon class="hd-alt" points="150,30 144,42 156,42"/>
+    <text class="k alt" x="150" y="14" text-anchor="middle">ALTITUDE</text>
+    <text x="150" y="27" text-anchor="middle" dy="-1" font-size="10">the outcome</text>
+
+    <line class="ln-dep" x1="150" y1="150" x2="150" y2="208" stroke-width="2"/>
+    <polygon class="hd-dep" points="150,218 144,206 156,206"/>
+    <text class="k dep" x="150" y="234" text-anchor="middle">DEPTH</text>
+    <text x="150" y="247" text-anchor="middle">the evidence</text>
+
+    <line class="ln-rng" x1="125" y1="125" x2="52" y2="125" stroke-width="2"/>
+    <polygon class="hd-rng" points="42,125 54,119 54,131"/>
+    <line class="ln-rng" x1="175" y1="125" x2="248" y2="125" stroke-width="2"/>
+    <polygon class="hd-rng" points="258,125 246,119 246,131"/>
+    <text class="k rng" x="40" y="110">RANGE</text>
+    <text x="260" y="110" text-anchor="end">other fields</text>
+
+    <rect class="diff" x="125" y="100" width="50" height="50" rx="4" stroke-width="1.5"/>
+    <text class="diff-t" x="150" y="129" text-anchor="middle">diff</text>
+  </svg>
+</header>
+
+<section>
+  <div class="sec-h">
+    <h2>The three moves</h2>
+    <p>Pick the one the task needs. Most tasks need one; few need all three. Each is also a command: type it after your request, or paste the prompt.</p>
+  </div>
+  <div class="moves">
+
+    <article class="move" style="--c: var(--alt)">
+      <h3><span class="glyph" aria-hidden="true">↑</span>Altitude<span class="cmd">/altitude</span></h3>
+      <p class="what">Work one level up: the outcome the task is a guess at.</p>
+      <div class="field"><span class="label">Reach for it when</span>
+        <p>The ticket prescribes the fix. You would call a meeting about it. The same kind of ticket keeps coming back.</p></div>
+      <div class="prompt">
+        <div class="prompt-h"><span class="label">Type this</span><button class="copy" type="button" data-copy="p-alt">Copy</button></div>
+        <p class="prompt-t" id="p-alt">Step back before you answer. What must be true after this, and what is the goal beyond that? Are the problem's assumptions right? What rules must any solution follow? Now judge this approach against the simplest one that meets them.</p>
+      </div>
+      <div class="field"><span class="label">Looks like</span>
+        <p>"Fix this crash" becomes "keep the app crash-free". A step back often makes the plan smaller: an over-built pipeline redone with half the parts.</p></div>
+      <p class="extra">When a ticket is done, ask which class it belongs to, and whether one follow-up would remove the class.</p>
+    </article>
+
+    <article class="move" style="--c: var(--dep)">
+      <h3><span class="glyph" aria-hidden="true">↓</span>Depth<span class="cmd">/deeper</span></h3>
+      <p class="what">Work the way the best engineer in the field would: from raw evidence, with real instruments.</p>
+      <div class="field"><span class="label">Reach for it when</span>
+        <p>It has to be right, not only done. Someone calls a risk "accepted" or a case "impossible" without measuring it.</p></div>
+      <div class="prompt">
+        <div class="prompt-h"><span class="label">Type this</span><button class="copy" type="button" data-copy="p-dep">Copy</button></div>
+        <p class="prompt-t" id="p-dep">I want a deeper version of this, not a bigger one. Before you start: what is the rawest evidence (data, logs, a real run; not the schema or my summary)? What would the best engineer here run to check it? What, other than you or me, would show it's right? Then do exactly that.</p>
+      </div>
+      <div class="field"><span class="label">Looks like</span>
+        <p>"Add a retry" starts with sorting the incident's failures from the logs. Result: the retry would have saved 0 of 10, so fix what actually failed.</p></div>
+      <p class="extra">Set a high bar for proof: all 90 days, not 3 examples.</p>
+    </article>
+
+    <article class="move" style="--c: var(--rng)">
+      <h3><span class="glyph" aria-hidden="true">↔</span>Range<span class="cmd">/range</span></h3>
+      <p class="what">Borrow the methods of other fields the work touches.</p>
+      <div class="field"><span class="label">Reach for it when</span>
+        <p>The work touches people, money, shared capacity, or numbers someone decides on.</p></div>
+      <div class="prompt">
+        <div class="prompt-h"><span class="label">Type this</span><button class="copy" type="button" data-copy="p-rng">Copy</button></div>
+        <p class="prompt-t" id="p-rng">Say what this does as a verb, not a noun. Which fields deal with that verb every day, and what is the one check each would run? Run those checks. Don't role-play the field.</p>
+      </div>
+      <div class="field"><span class="label">Looks like</span>
+        <p>"Parallelize the reads" becomes "serve more requests from a shared, bounded pool without starving anyone". That is capacity planning, whose check is a load test on the real pool.</p></div>
+      <p class="extra">Use a field for its methods. "Review as an SRE" changes the tone; "replay 90 days and count the pages" changes the result.</p>
+    </article>
+
+  </div>
+</section>
+
+<section class="judge">
+  <div>
+    <h2>Don't let it grade itself</h2>
+    <div class="body">
+      <p>A model's "looks good" is not evidence. Ask for a check that something else runs: a test, a query, a diff of outputs. Run it on main and on the branch, against the real dependency. A mock that skips the risky behaviour proves nothing about it.</p>
+      <p>For a second opinion, give a fresh agent the work, not your conclusion. <code>/deeper</code> includes this check.</p>
+    </div>
+  </div>
+  <div class="prompt">
+    <div class="prompt-h"><span class="label">Type this</span><button class="copy" type="button" data-copy="p-judge">Copy</button></div>
+    <p class="prompt-t" id="p-judge">Don't grade your own work. Name the command or query whose output would convince a skeptic, run it on main and on the branch through the real dependency, and show me both outputs.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-h">
+    <h2>What deep looks like</h2>
+    <p>Shallow work changes the words. Deep work changes the method.</p>
+  </div>
+  <div class="tbl-wrap depth-tbl">
+    <table>
+      <thead><tr><th>Task</th><th>Shallow</th><th class="deep">Deep</th></tr></thead>
+      <tbody>
+        <tr><td class="task">Wrong numbers</td><td class="shallow">Read the SQL, spot the fan-out, add DISTINCT.</td><td>Reproduce one bad key from the raw tables. Fix the grain. Diff old vs new per key over the same window. Count the days and the downstream readers affected.</td></tr>
+        <tr><td class="task">Slow query</td><td class="shallow">Change the sort key on a hunch: "should be faster".</td><td>Take the real query from the query log (rows read, memory). EXPLAIN it. Compare before and after on the same data and settings, several runs each.</td></tr>
+        <tr><td class="task">Shared pool</td><td class="shallow">Mock-transport tests; "starvation is an accepted limit".</td><td>Concurrent callers on the real pool, main vs branch. One run showed 200 on main and 502 on the branch.</td></tr>
+        <tr><td class="task">Error mapping</td><td class="shallow">Unit-test the classifier with a hand-built error.</td><td>Send a real 429 through the production retry setting. The wrapper hid the status the classifier needed.</td></tr>
+        <tr><td class="task">Schema change</td><td class="shallow">Read the schema.</td><td>Query the historical rows: null rates, old shapes, values the schema allows but nobody expected.</td></tr>
+        <tr><td class="task">Flaky job</td><td class="shallow">Wrap it in a retry.</td><td>Sort the failures from the logs by shape. Check the write is idempotent before retrying it. Test the most frequent failure, not the easiest one.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="lower">
+  <section>
+    <div class="sec-h">
+      <h2>Borrow a check</h2>
+      <p>Find the verb, then borrow the method of the field that lives with it.</p>
+    </div>
+    <div class="tbl-wrap range-tbl">
+      <table>
+        <thead><tr><th>If the work…</th><th class="borrow">Borrow this check</th></tr></thead>
+        <tbody>
+          <tr><td>pages someone at night</td><td>Replay history and count how often it would fire. Test the route end to end.</td></tr>
+          <tr><td>shares a limited resource</td><td>Worst-case concurrency against the real limit. A load test.</td></tr>
+          <tr><td>makes numbers people decide on</td><td>Reconcile with an independent source. The parts sum to the whole. Diff per key.</td></tr>
+          <tr><td>ranks or scores people</td><td>Small-sample noise and survivorship. How would someone game it?</td></tr>
+          <tr><td>changes a contract others read</td><td>List every consumer, then check each one.</td></tr>
+          <tr><td>costs money per run</td><td>Cost per run, before and after.</td></tr>
+          <tr><td>runs unattended</td><td>Rerun it, and kill it halfway. What happens?</td></tr>
+          <tr><td>tells a user something</td><td>One row per failure: what they see, what they do next.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-h">
+      <h2>Traps</h2>
+      <p>Where asking for more goes wrong.</p>
+    </div>
+    <ul class="traps">
+      <li><strong>Bigger instead of deeper</strong>More features, more abstractions, more checks shipped to production. Depth belongs in the proof, not in the product.</li>
+      <li><strong>Argued risk</strong>"Edge case" and "accepted limit" with no measurement behind them. Ask what run shows it.</li>
+      <li><strong>Role-play</strong>A persona changes the transcript, not the outcome. Ask for the field's method.</li>
+      <li><strong>No access</strong>An agent that can't reach the logs or the data reasons around them. Fix the access once, not on every ticket.</li>
+    </ul>
+  </section>
+</div>
+
+<footer>Source: Felix Rieseberg, <a href="https://felixrieseberg.com/how-to-be-more-ambitious-a-tutorial-for-humans-with-models/">How to be more ambitious: A tutorial for humans with models</a>. Examples come from real review rounds, with the details removed. The commands are skills in the <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/prompts/skills">prompts plugin</a>.</footer>
+
+</div>
+
+<script>
+(function () {
+  function selectText(el) {
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  document.querySelectorAll('button.copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var el = document.getElementById(btn.getAttribute('data-copy'));
+      var done = function () {
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+      };
+      try {
+        navigator.clipboard.writeText(el.innerText).then(done, function () { selectText(el); });
+      } catch (e) {
+        selectText(el);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>

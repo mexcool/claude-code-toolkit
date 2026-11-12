@@ -50,17 +50,17 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 
 ## The loop
 
-1. **Kickoff.** The implementer writes `ticket-kickoff.md`. It ends with a **Contract**: the files it will change, the rough diff size, the "Done when" items this PR closes, and what is out of scope. The reviewer writes `kickoff-review-N.md`. Each finding has an id, a severity, evidence and a minimum fix, and the file ends with a verdict.
+1. **Kickoff.** The implementer writes `ticket-kickoff.md`. It ends with a **Contract**: the files it will change, the rough diff size, the "Done when" items this PR closes with the check for each, and what is out of scope. The reviewer writes `kickoff-review-N.md`. Each finding has an id, a severity, evidence and a minimum fix, and the file ends with a verdict.
 2. **Sort every finding** into `lead-kickoff-N.md`, with your decision on each one:
    - **must-fix** (wrong behaviour, a ticket requirement not met, security): relay.
    - **should-fix**, if it is small and inside the contract: relay.
-   - **drop**: nits, style, "you could also", edge cases that cannot happen, new abstractions, extra docs or tests. List the drops in the file and in the log.
+   - **drop**: nits, style, "you could also", edge cases that cannot happen, new abstractions, extra docs, speculative tests (a test that checks a contract item or measures an accepted risk is not speculative). List the drops in the file and in the log.
 
    The implementer updates the kickoff in place. It answers in `kickoff-response-N.md`: **accepted** (what changed) or **push back** (with evidence). Pushing back is normal.
 3. **Later rounds:** the reviewer rechecks only its open findings and what changed. It raises a new finding only if it is must-fix. Allow one exchange per disagreement. After that, decide from the ticket and the code.
 4. **When a stage ends:** at LGTM, at a round with nothing to relay, or when a point comes back without new evidence. There is no hard limit. If a stage reaches round 3, log why and tell the user.
 5. **User decisions that add scope** go out with your next relay, not in the middle of a review, so the reviewer reviews one version.
-6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user. Decide the blind reviewer now, before any code exists, and log it: it is on unless the contract is docs only or tests only. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, validation output, any difference from the contract and why).
+6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user. Decide the blind reviewer now, before any code exists, and log it: it is on unless the contract is docs only or tests only. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, the output of each contract check, any difference from the contract and why).
 7. **PR review:** the same loop with `pr-review-N.md`, `lead-pr-N.md` and `pr-response-N.md`. The reviewer also checks the PR against the agreed kickoff: anything agreed but missing, anything built but not agreed. Do not drop a finding only because it contradicts the ticket, the contract or an earlier decision: drop it with evidence, and send a product call to the user.
 8. **Blind reviewer**, unless you skipped it at step 6 and the PR still matches that docs- or tests-only contract. When `pr-ready.md` lands, make `<dir>-blind/` next to the loop folder (no path to the plan), write `brief-blind.md` there from [briefs.md](briefs.md), split the reviewer's pane down, start `<codex-cmd>`, name it `<t>-blind` as in Setup, and send the brief with the reviewer's round 1. It then runs the loop like the reviewer, writing `pr-blind-N.md` in its folder. Relay once per round, when both reviews are in, and stop sending rounds to a reviewer with no open findings. If the blind reviewer stalls past the grace window, go on without it and log it. The stage ends when both are done.
 9. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.
@@ -79,7 +79,7 @@ The implementer runs these steps because an isolated lead cannot run git in othe
 
 ## End
 
-Stop your background waits (TaskStop) first, or each one fails with `agent_not_running`. Then close the worker panes you created (`herdr pane close`); their sessions stay on disk. If the proof needs time (for example a soak week), schedule it with `follow-up-check`. Give the user the result and the open items.
+Stop your background waits (TaskStop) first, or each one fails with `agent_not_running`. Then close the worker panes you created (`herdr pane close`); their sessions stay on disk. If the proof needs time (for example a soak week), schedule it with `follow-up-check`. Give the user the result and the open items. Name the class of problem the ticket belongs to, and if one follow-up would remove the class, propose it; don't build it.
 
 ## Gotchas
 

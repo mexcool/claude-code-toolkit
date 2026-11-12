@@ -326,7 +326,7 @@ section{display:flex;flex-direction:column;gap:24px}
   <div class="triage">
     <div class="tri" style="--c:var(--must)"><div class="tri-h"><span class="tri-k">must-fix</span><span class="tri-v">relayed</span></div><p>Wrong behaviour, a ticket requirement not met, or a security problem.</p></div>
     <div class="tri" style="--c:var(--should)"><div class="tri-h"><span class="tri-k">should-fix</span><span class="tri-v">relayed if small</span></div><p>Real and small, and inside the contract the kickoff agreed.</p></div>
-    <div class="tri" style="--c:var(--muted)"><div class="tri-h"><span class="tri-k">drop</span><span class="tri-v">logged</span></div><p>Nits, style, “you could also”, edge cases that cannot happen, new abstractions, extra docs or tests.</p></div>
+    <div class="tri" style="--c:var(--muted)"><div class="tri-h"><span class="tri-k">drop</span><span class="tri-v">logged</span></div><p>Nits, style, “you could also”, edge cases that cannot happen, new abstractions, extra docs, speculative tests. A test that checks a contract item or measures an accepted risk is not speculative.</p></div>
   </div>
   <p class="aside-note">The lead never drops a finding only because it contradicts the ticket, the contract or an earlier decision. It needs evidence to drop one, and a product question goes to you.</p>
 </section>
@@ -343,7 +343,7 @@ section{display:flex;flex-direction:column;gap:24px}
   </div>
 </section>
 
-<footer class="foot">Matches the skill as of claude-dev-tools 1.5.3. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
+<footer class="foot">Matches the skill as of claude-dev-tools 1.6.0. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
 
 </div>
 
@@ -366,7 +366,7 @@ section{display:flex;flex-direction:column;gap:24px}
      b:'The lead writes one brief per worker, with literal paths and names. It sends each worker a one-line prompt in the background and ends its turn. herdr wakes it when a worker’s turn ends.',
      p:{lead:W('wrote brief-impl.md', 'wrote brief-rev.md', '→ impl, → rev', 'waiting on herdr'), impl:W('[proj-123-lead] Read brief-impl.md', 'reading the brief'), rev:W('[proj-123-lead] Read brief-rev.md', 'reading the brief')}},
     {st:1, t:'Kickoff and prep, side by side', who:['impl','rev'], files:['prep.md','ticket-kickoff.md'],
-     b:'The implementer runs the ticket kickoff skill: the ticket, its parent and related tickets, the code and recent PRs. No code yet. The kickoff ends with a Contract that lists the files it will change, the rough diff size, the Done-when items this PR closes, and what is out of scope. Meanwhile the reviewer reads the ticket and the code on its own, so it has a view before it sees the plan.',
+     b:'The implementer runs the ticket kickoff skill: the ticket, its parent and related tickets, the code and recent PRs. No code yet. The kickoff ends with a Contract that lists the files it will change, the rough diff size, the Done-when items this PR closes with the check for each, and what is out of scope. Meanwhile the reviewer reads the ticket and the code on its own, so it has a view before it sees the plan.',
      p:{lead:I('waiting on impl and rev'), impl:W('running ticket kickoff skill', 'reading ticket, code, PRs', 'wrote ticket-kickoff.md', '## Contract'), rev:W('prep: ticket and code first', 'wrote prep.md')}},
     {st:1, t:'The reviewer checks the plan', who:['rev'], files:['kickoff-review-1.md'],
      b:'The reviewer runs the kickoff review skill on ticket-kickoff.md. Every finding gets an id, a severity, evidence and the smallest fix. The file ends with a verdict.',
@@ -381,7 +381,7 @@ section{display:flex;flex-direction:column;gap:24px}
      b:'The reviewer rechecks only its open findings and what changed, and raises a new finding only if it is must-fix. Each disagreement gets one exchange, then the lead decides. When both workers agree, the lead tells you. You have no plan to approve. The lead also decides now whether a blind reviewer joins at the PR stage. It does, unless the change is only docs or only tests.',
      p:{lead:W('kickoff agreed, telling you', 'blind reviewer: on'), impl:I('turn ended'), rev:W('K1 resolved ✓', 'K2 conceded ✓', 'Verdict: LGTM')}},
     {st:2, t:'Build, open the PR, get CI green', who:['impl'], files:['pr-ready.md'],
-     b:'Only the implementer changes the worktree. It branches from the latest origin/main, writes the code, opens the PR ready for review and waits for green CI. pr-ready.md holds the links, the validation output, and any difference from the contract with the reason.',
+     b:'Only the implementer changes the worktree. It branches from the latest origin/main, writes the code, opens the PR ready for review and waits for green CI. pr-ready.md holds the links, the output of each contract check, and any difference from the contract with the reason.',
      p:{lead:I('waiting on impl'), impl:W('[proj-123-lead] Kickoff agreed. Build it.', '$ git switch -c feat/proj-123', '$ gh pr create', 'CI green ✓', 'wrote pr-ready.md'), rev:I('turn ended')}},
     {st:3, t:'A blind reviewer joins', who:['lead','blind'], files:['blind/brief-blind.md'],
      b:'The lead splits the reviewer’s pane and starts a second Codex. It gets its own folder and a brief with no path to the plan, so its first round comes from the ticket and the PR alone. It is a second opinion that was never anchored on the kickoff.',
@@ -396,7 +396,7 @@ section{display:flex;flex-direction:column;gap:24px}
      b:'The lead reads the PR diff itself and checks it against the contract, because a reviewer’s LGTM does not replace its own read. Then it asks you. After your yes, it gives the implementer an ops file with stop conditions. The merge is pinned to the reviewed commit, and the implementer stops at the first failure and reports back.',
      p:{lead:W('gh pr diff matches contract ✓', 'Merge the PR? waiting for you', '> yes', 'wrote lead-ops-1.md'), impl:W('$ gh pr merge --squash \\', '    --match-head-commit <sha>', 'merged ✓', 'wrote ops-1.md'), rev:I('turn ended'), blind:I('turn ended')}},
     {st:4, t:'Wrap up', who:['lead'], files:[],
-     b:'The lead stops its background waits and closes the worker panes. Their sessions stay on disk. If the proof needs time, such as a week of data, it schedules a follow-up check. You get the result and the open items.',
+     b:'The lead stops its background waits and closes the worker panes. Their sessions stay on disk. If the proof needs time, such as a week of data, it schedules a follow-up check. You get the result and the open items, plus a proposed follow-up if one would remove the whole class of problem.',
      p:{lead:W('stop background waits', 'close worker panes', 'follow-up check, if needed', 'result and open items ✓')}}
   ];
 

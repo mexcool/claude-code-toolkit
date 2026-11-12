@@ -14,13 +14,13 @@ The **Codex** column marks plugins whose skills are agent-agnostic and exported 
 | [gist](./plugins/gist) | GitHub Gists as a lightweight pastebin via the `gh` CLI | ✓ |
 | [obsidian-helper](./plugins/obsidian-helper) | Session notes and task tracking in Obsidian | — |
 | [pastila](./plugins/pastila) | Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse) | — |
-| [prompts](./plugins/prompts) | Reusable starter prompts — `pr-review`, `ticket-kickoff`, `kickoff-review` | ✓ |
+| [prompts](./plugins/prompts) | Reusable starter prompts — `pr-review`, `ticket-kickoff`, `kickoff-review`, `altitude`, `deeper`, `range` | ✓ |
 | [reference-docs](./plugins/reference-docs) | Reference books/docs as on-demand skills — `inference-engineering` ([Baseten's Inference Engineering book](https://www.baseten.co/inference-engineering/)) | ✓ |
 | [ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior-dev mode — YAGNI, stdlib first, no unrequested abstractions (third-party, referenced) | — |
 
 `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams); `obsidian-helper` / `pastila` ship slash-commands, not skills — so neither is exported to Codex.
 
-To see how a `ticket-orchestrator` run works, step through [the explainer](https://mexcool.github.io/claude-code-toolkit/ticket-orchestrator.html).
+To see how a `ticket-orchestrator` run works, step through [the explainer](https://mexcool.github.io/claude-code-toolkit/ticket-orchestrator.html). For prompts that ask a model for more without growing the change, see [Be More Ambitious](https://mexcool.github.io/claude-code-toolkit/be-more-ambitious.html).
 
 ## Installation
 
@@ -44,7 +44,7 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-This links `agent-sessions`, `axi`, `cursor-cli-dev`, `gist`, `inference-engineering`, `kickoff-review`, `pr-review`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
+This links `agent-sessions`, `altitude`, `axi`, `cursor-cli-dev`, `deeper`, `gist`, `inference-engineering`, `kickoff-review`, `pr-review`, `range`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
 
 ## Adding a Skill to an Existing Plugin
 
