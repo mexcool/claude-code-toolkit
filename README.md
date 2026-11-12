@@ -8,7 +8,7 @@ The **Codex** column marks plugins whose skills are agent-agnostic and exported 
 
 | Plugin | Description | Codex |
 |--------|-------------|:-----:|
-| [claude-dev-tools](./plugins/claude-dev-tools) | Context optimization and continuous learning tools | — |
+| [claude-dev-tools](./plugins/claude-dev-tools) | Plan usage limits, follow-up checks and ticket orchestration | — |
 | [agent-sessions](./plugins/agent-sessions) | Find and resume Claude Code / Codex sessions after a terminal dies | ✓ |
 | [cli-dev](./plugins/cli-dev) | Skills for designing and reviewing agent-friendly CLI tools | ✓ |
 | [gist](./plugins/gist) | GitHub Gists as a lightweight pastebin via the `gh` CLI | ✓ |
@@ -18,7 +18,7 @@ The **Codex** column marks plugins whose skills are agent-agnostic and exported 
 | [reference-docs](./plugins/reference-docs) | Reference books/docs as on-demand skills — `inference-engineering` ([Baseten's Inference Engineering book](https://www.baseten.co/inference-engineering/)) | ✓ |
 | [ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior-dev mode — YAGNI, stdlib first, no unrequested abstractions (third-party, referenced) | — |
 
-`claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams); `obsidian-helper` / `pastila` ship slash-commands, not skills — so neither is exported to Codex.
+`claude-dev-tools` is Claude-specific (usage endpoint, Claude Code sessions, routines and background tasks); `obsidian-helper` / `pastila` ship slash-commands, not skills — so neither is exported to Codex.
 
 To see how a `ticket-orchestrator` run works, step through [the explainer](https://mexcool.github.io/claude-code-toolkit/ticket-orchestrator.html). For prompts that ask a model for more without growing the change, see [Be More Ambitious](https://mexcool.github.io/claude-code-toolkit/be-more-ambitious.html).
 
@@ -88,7 +88,6 @@ plugins/
 
 ## Credits
 
-- Skills in `claude-dev-tools` are adapted from [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by [@affaanmustafa](https://x.com/affaanmustafa), licensed under MIT.
 - `cli-dev:axi` is from [kunchenguid/axi](https://github.com/kunchenguid/axi) by Kun Cheng, licensed under MIT.
 - `cli-dev:cursor-cli-dev` is from [cursor/plugins](https://github.com/cursor/plugins/blob/main/cli-for-agent/skills/cli-for-agents/SKILL.md) by Cursor.
 - `obsidian-helper` is inspired by [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) by Steph Ango (Obsidian).

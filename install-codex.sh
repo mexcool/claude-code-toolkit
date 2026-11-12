@@ -9,7 +9,8 @@
 #
 # Only agent-agnostic plugins are exported. Skipped on purpose:
 #   claude-dev-tools          every skill is Claude-specific (OAuth usage
-#                             endpoint, /compact, Claude hooks, Agent Teams)
+#                             endpoint, Claude Code sessions, routines,
+#                             background tasks)
 #   obsidian-helper, pastila  slash-commands, not skills (Claude command format)
 # To export a new plugin's skills, add it to AGENT_AGNOSTIC_PLUGINS below.
 #

@@ -1,16 +1,15 @@
 {
   "name": "claude-dev-tools",
-  "version": "1.6.0",
-  "description": "Context optimization and continuous learning tools for Claude Code development",
+  "version": "2.0.0",
+  "description": "Plan usage limits, follow-up checks and ticket orchestration for Claude Code",
   "author": {
     "name": "mexcool"
   },
   "license": "MIT",
   "keywords": [
     "claude-code",
-    "context-management",
-    "continuous-learning",
+    "usage-limits",
     "workflow",
-    "optimization"
+    "orchestration"
   ]
 }

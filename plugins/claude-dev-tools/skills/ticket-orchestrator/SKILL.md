@@ -1,6 +1,6 @@
 ---
 name: ticket-orchestrator
-description: "Run one ticket end to end with two worker agents in herdr panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. herdr's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1). For many tickets in parallel, use orchestrate-implementation."
+description: "Run one ticket end to end with two worker agents in herdr panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. herdr's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1)."
 version: 0.1.0
 ---
 

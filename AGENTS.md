@@ -55,15 +55,7 @@ plugins/
 
 ### claude-dev-tools
 
-Context optimization, continuous learning, and agent orchestration tools:
-
-- **strategic-compact**: Suggests manual `/compact` at logical task boundaries instead of arbitrary auto-compaction. Triggers on Edit/Write tool use after configurable threshold (default: 50 tool calls).
-
-- **continuous-learning-v2**: Instinct-based learning system that observes sessions via PreToolUse/PostToolUse hooks and creates atomic "instincts" with confidence scoring. Instincts can evolve into full skills/commands/agents.
-
-- **cmux**: Reference for spawning and coordinating teams of agents in cmux panes. Covers Agent Teams (TeamCreate/SendMessage) for Claude Code agents, and generic cmux commands for other tools (Codex, Cursor CLI).
-
-- **orchestrate-implementation**: Orchestrates parallel coding agents for ticket implementation via cmux. Assembles context from Linear tickets, writes detailed prompts with guardrails, spawns agents in worktrees, monitors progress, relays answers, and cleans up.
+Plan usage, follow-up checks and ticket orchestration:
 
 - **claude-limits**: Shows real Claude plan usage limits (session/weekly/per-model/monthly extra-usage) by reading the local OAuth token and calling the `/api/oauth/usage` endpoint. Reports actual plan-limit percentages, not log-based estimates. Subscription auth only — not applicable under Bedrock or a raw API key.
 
@@ -173,4 +165,4 @@ Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-Installs `agent-sessions`, `altitude`, `axi`, `cursor-cli-dev`, `deeper`, `gist`, `inference-engineering`, `kickoff-review`, `pr-review`, `range`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, `/compact`, hooks, Agent Teams) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
+Installs `agent-sessions`, `altitude`, `axi`, `cursor-cli-dev`, `deeper`, `gist`, `inference-engineering`, `kickoff-review`, `pr-review`, `range`, `ticket-kickoff`. `claude-dev-tools` is Claude-specific (usage endpoint, Claude Code sessions, routines and background tasks) and intentionally not exported; `obsidian-helper` / `pastila` are slash-commands, not skills.
