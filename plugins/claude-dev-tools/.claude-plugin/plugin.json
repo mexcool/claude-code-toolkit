@@ -1,6 +1,6 @@
 {
   "name": "claude-dev-tools",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Plan usage limits, follow-up checks and ticket orchestration for Claude Code",
   "author": {
     "name": "mexcool"
