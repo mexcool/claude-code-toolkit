@@ -8,14 +8,16 @@ version: 0.1.0
 
 You are the **lead**. You do not implement or review. Your two jobs that matter most: keep scope from growing round after round, and run no step that needs the user without the user.
 
-| Role | Name (herdr agent, pane, session) | Does |
-|---|---|---|
-| Lead (you) | `<t>-lead` | relays, sorts findings, decides, logs |
-| Implementer | `<t>-impl` | **ticket kickoff** skill, then code, PR, CI |
-| Reviewer | `<t>-rev` | **kickoff review** skill, then **PR review** skill. Read-only |
-| Blind reviewer | `<t>-blind` | **PR review** skill, PR stage only. Round 1 from the ticket and the PR alone, without the plan. Read-only |
+| Role | Name (herdr agent, pane, session) | Model | Does |
+|---|---|---|---|
+| Lead (you) | `<t>-lead` | Fable | relays, sorts findings, decides, logs |
+| Implementer | `<t>-impl` | Opus | **ticket kickoff** skill, then code, PR, CI |
+| Reviewer | `<t>-rev` | Sol | **kickoff review** skill, then **PR review** skill. Read-only |
+| Blind reviewer | `<t>-blind` | Sol | **PR review** skill, PR stage only. Round 1 from the ticket and the PR alone, without the plan. Read-only |
 
 `<t>` is the ticket id in lower case (`proj-123`). Use one name everywhere: the user follows the sessions by name in the Claude Code and Codex apps.
+
+Each role runs the latest release of its model, unless the user names another one. Claude Code's `fable` and `opus` aliases follow the latest release. Codex has no alias, so you look up the newest Sol at Setup.
 
 ## Setup
 
@@ -23,21 +25,23 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 1. Check the usage limits (`claude-limits`). Do not spawn into paid overage without asking.
 2. Make the folder `~/ticket-orchestrator/<TICKET>/` and start `log.md`: one line per event, time from `date -u`. The user catches up from it.
 3. **Claim the ticket:** assign it to the user and set it In Progress, unless it already is. Log it.
-4. Name yourself: `herdr agent rename <your-pane> <t>-lead`, and `herdr tab rename` the tab to `<t>`. The user starts you with `-n <t>-lead`, or you `/rename` (Gotchas).
+4. Name yourself: `herdr agent rename <your-pane> <t>-lead`, and `herdr tab rename` the tab to `<t>`. The user starts you with `--model fable -n <t>-lead`, or you `/rename` (Gotchas). If you are not on Fable, tell the user once: they can switch you with `/model fable`.
 5. Three equal columns in your tab, all in **your worktree**. The workers do not make their own.
 
    ```bash
    herdr pane split <lead-pane> --direction right --cwd <worktree> --no-focus    # → impl pane
    herdr pane split <impl-pane> --direction right --cwd <worktree> --no-focus    # → rev pane
    herdr pane resize --direction left --amount 0.17 --pane <impl-pane>           # 1/2,1/4,1/4 → thirds
-   herdr pane run <impl-pane> "<claude-cmd> -n <t>-impl"
-   herdr pane run <rev-pane>  "<codex-cmd>"
+   herdr pane run <impl-pane> "<claude-cmd> --model opus -n <t>-impl"
+   herdr pane run <rev-pane>  "<codex-cmd> -m <sol>"
    <skill-dir>/scripts/wait-agent.sh <impl-pane> claude   # and <rev-pane> codex: herdr's detection, not a screen regex
    herdr agent rename <pane> <t>-impl          # and <t>-rev; herdr pane rename both too
    herdr agent prompt <t>-rev "/rename <t>-rev"   # Codex has no name flag and titles a thread from its first prompt
    ```
 
    `<claude-cmd>` is `$ORCH_CLAUDE_CMD` if it is set (the user's bypass alias), else `claude --dangerously-skip-permissions`. `<codex-cmd>` is `$ORCH_CODEX_CMD`, else `codex --dangerously-bypass-approvals-and-sandbox`. Read the variables with `echo`, then pass the literal text. The pane's interactive shell expands the aliases.
+
+   `<sol>` is the newest Sol slug: run `codex debug models | grep -oE '"slug": ?"[^"]*-sol"'` and take the highest version (for example `gpt-6.1-sol`). Always grep: the catalog is one very long line. If it prints nothing, leave `-m` out, and Codex uses its configured model. Leave a model flag out too if the launch command already sets one.
 6. Write `brief-impl.md` and `brief-rev.md` from [briefs.md](briefs.md), with literal paths and names. Send each one line, as in Protocol: the implementer starts the kickoff. The reviewer starts **prep**: it reads the ticket and the code before it sees the plan, so it has its own view, and writes `prep.md`.
 
 ## Protocol
@@ -62,7 +66,7 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 5. **User decisions that add scope** go out with your next relay, not in the middle of a review, so the reviewer reviews one version.
 6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user. Decide the blind reviewer now, before any code exists, and log it: it is on unless the contract is docs only or tests only. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, the output of each contract check, any difference from the contract and why).
 7. **PR review:** the same loop with `pr-review-N.md`, `lead-pr-N.md` and `pr-response-N.md`. The reviewer also checks the PR against the agreed kickoff: anything agreed but missing, anything built but not agreed. Do not drop a finding only because it contradicts the ticket, the contract or an earlier decision: drop it with evidence, and send a product call to the user.
-8. **Blind reviewer**, unless you skipped it at step 6 and the PR still matches that docs- or tests-only contract. When `pr-ready.md` lands, make `<dir>-blind/` next to the loop folder (no path to the plan), write `brief-blind.md` there from [briefs.md](briefs.md), split the reviewer's pane down, start `<codex-cmd>`, name it `<t>-blind` as in Setup, and send the brief with the reviewer's round 1. It then runs the loop like the reviewer, writing `pr-blind-N.md` in its folder. Relay once per round, when both reviews are in, and stop sending rounds to a reviewer with no open findings. If the blind reviewer stalls past the grace window, go on without it and log it. The stage ends when both are done.
+8. **Blind reviewer**, unless you skipped it at step 6 and the PR still matches that docs- or tests-only contract. When `pr-ready.md` lands, make `<dir>-blind/` next to the loop folder (no path to the plan), write `brief-blind.md` there from [briefs.md](briefs.md), split the reviewer's pane down, start `<codex-cmd> -m <sol>`, name it `<t>-blind` as in Setup, and send the brief with the reviewer's round 1. It then runs the loop like the reviewer, writing `pr-blind-N.md` in its folder. Relay once per round, when both reviews are in, and stop sending rounds to a reviewer with no open findings. If the blind reviewer stalls past the grace window, go on without it and log it. The stage ends when both are done.
 9. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.
 
 ## Steps that need the user

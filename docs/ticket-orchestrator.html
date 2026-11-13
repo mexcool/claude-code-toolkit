@@ -206,9 +206,9 @@ section{display:flex;flex-direction:column;gap:24px}
   </div>
   <div class="start">
     <div class="start-label">How a run starts</div>
-    <pre class="cmd"><span class="p">$</span> claude --worktree -n proj-123-lead
+    <pre class="cmd"><span class="p">$</span> claude --worktree --model fable -n proj-123-lead
 <span class="p">&gt;</span> orchestrate PROJ-123</pre>
-    <p class="note">Needs herdr. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed.</p>
+    <p class="note">Needs herdr. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed. The lead runs on Fable, the implementer on Opus and both reviewers on Sol: the latest release of each, unless you name another model.</p>
   </div>
 </header>
 
@@ -268,10 +268,10 @@ section{display:flex;flex-direction:column;gap:24px}
       <thead><tr><th>Role</th><th>Runs as</th><th>Writes</th><th>Rule it keeps</th></tr></thead>
       <tbody>
         <tr style="--c:var(--fg)"><td><span class="rdot"></span>You</td><td class="runs">the lead's chat</td><td>yes or no</td><td>Merge, apply, deploy, test pages and product calls wait for you.</td></tr>
-        <tr style="--c:var(--lead)"><td><span class="rdot"></span>Lead</td><td class="runs">Claude · proj-123-lead</td><td><span class="writes"><code>log.md</code><code>brief-*.md</code><code>lead-*-N.md</code></span></td><td>Relays, sorts and decides. Never implements or reviews.</td></tr>
-        <tr style="--c:var(--impl)"><td><span class="rdot"></span>Implementer</td><td class="runs">Claude · proj-123-impl</td><td><span class="writes"><code>ticket-kickoff.md</code><code>*-response-N.md</code><code>pr-ready.md</code><code>ops-N.md</code></span></td><td>The only agent that changes the worktree. Makes the smallest change that meets the ticket.</td></tr>
-        <tr style="--c:var(--rev)"><td><span class="rdot"></span>Reviewer</td><td class="runs">Codex · proj-123-rev</td><td><span class="writes"><code>prep.md</code><code>kickoff-review-N.md</code><code>pr-review-N.md</code></span></td><td>Read-only and posts nothing. Reviews the kickoff, then the PR.</td></tr>
-        <tr style="--c:var(--blind)"><td><span class="rdot"></span>Blind reviewer</td><td class="runs">Codex · proj-123-blind</td><td><span class="writes"><code>pr-blind-N.md</code></span></td><td>Joins at the PR stage. Its first round sees only the ticket and the PR.</td></tr>
+        <tr style="--c:var(--lead)"><td><span class="rdot"></span>Lead</td><td class="runs">Claude · Fable · proj-123-lead</td><td><span class="writes"><code>log.md</code><code>brief-*.md</code><code>lead-*-N.md</code></span></td><td>Relays, sorts and decides. Never implements or reviews.</td></tr>
+        <tr style="--c:var(--impl)"><td><span class="rdot"></span>Implementer</td><td class="runs">Claude · Opus · proj-123-impl</td><td><span class="writes"><code>ticket-kickoff.md</code><code>*-response-N.md</code><code>pr-ready.md</code><code>ops-N.md</code></span></td><td>The only agent that changes the worktree. Makes the smallest change that meets the ticket.</td></tr>
+        <tr style="--c:var(--rev)"><td><span class="rdot"></span>Reviewer</td><td class="runs">Codex · Sol · proj-123-rev</td><td><span class="writes"><code>prep.md</code><code>kickoff-review-N.md</code><code>pr-review-N.md</code></span></td><td>Read-only and posts nothing. Reviews the kickoff, then the PR.</td></tr>
+        <tr style="--c:var(--blind)"><td><span class="rdot"></span>Blind reviewer</td><td class="runs">Codex · Sol · proj-123-blind</td><td><span class="writes"><code>pr-blind-N.md</code></span></td><td>Joins at the PR stage. Its first round sees only the ticket and the PR.</td></tr>
       </tbody>
     </table>
   </div>
@@ -343,7 +343,7 @@ section{display:flex;flex-direction:column;gap:24px}
   </div>
 </section>
 
-<footer class="foot">Matches the skill as of claude-dev-tools 1.6.0. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
+<footer class="foot">Matches the skill as of claude-dev-tools 2.1.0. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
 
 </div>
 
@@ -358,7 +358,7 @@ section{display:flex;flex-direction:column;gap:24px}
   const STEPS = [
     {st:0, t:'You start the lead', who:['you','lead'], files:[],
      b:'Start Claude in a fresh worktree under the lead’s name, then name the ticket. After that you only answer product questions and give the final yes.',
-     p:{lead:W('$ claude --worktree -n proj-123-lead', '> orchestrate PROJ-123')}},
+     p:{lead:W('$ claude --worktree --model fable -n proj-123-lead', '> orchestrate PROJ-123')}},
     {st:0, t:'The lead sets up the run', who:['lead'], files:['log.md'],
      b:'It checks that it is in its own clean worktree and that the plan has usage left. It makes the loop folder and a log, assigns the ticket to you and moves it to In Progress. Then it splits the tab into three columns and starts Claude in the middle and Codex on the right, all in the same worktree.',
      p:{lead:W('worktree is clean ✓', 'usage limits ok ✓', 'PROJ-123 → In Progress', 'split tab, start workers'), impl:I('Claude Code', 'waiting for a prompt'), rev:I('Codex', 'waiting for a prompt')}},
