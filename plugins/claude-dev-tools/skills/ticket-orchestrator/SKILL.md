@@ -1,6 +1,6 @@
 ---
 name: ticket-orchestrator
-description: "Run one ticket end to end with two worker agents in herdr panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. herdr's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1)."
+description: "Run one ticket end to end with two worker agents in herdr or Rex panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. The multiplexer's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1) or Rex (REX_SESSION)."
 version: 0.1.0
 ---
 
@@ -8,7 +8,7 @@ version: 0.1.0
 
 You are the **lead**. You do not implement or review. Your two jobs that matter most: keep scope from growing round after round, and run no step that needs the user without the user.
 
-| Role | Name (herdr agent, pane, session) | Model | Does |
+| Role | Name (pane, agent, session) | Model | Does |
 |---|---|---|---|
 | Lead (you) | `<t>-lead` | Fable | relays, sorts findings, decides, logs |
 | Implementer | `<t>-impl` | Opus | **ticket kickoff** skill, then code, PR, CI |
@@ -19,25 +19,25 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 
 Each role runs the latest release of its model, unless the user names another one. Claude Code's `fable` and `opus` aliases follow the latest release. Codex has no alias, so you look up the newest Sol at Setup.
 
+**herdr or Rex.** Make every pane and agent call through `mux.sh` (`<skill-dir>/scripts/mux.sh`; run it with no arguments for its commands). It uses herdr when `HERDR_ENV=1`, else Rex when `REX_SESSION` is set, so this skill reads the same under both. One difference: herdr reads an agent's state from its screen, while under Rex the agent reports its own state.
+
 ## Setup
 
 0. **You must be in your own worktree.** `git rev-parse --git-dir` must differ from `git rev-parse --git-common-dir`, and `git status` must be clean. If not, stop and ask the user to start you with `claude --worktree` (or their alias for it). The implementer makes branches in this checkout.
 1. Check the usage limits (`claude-limits`). Do not spawn into paid overage without asking.
 2. Make the folder `~/ticket-orchestrator/<TICKET>/` and start `log.md`: one line per event, time from `date -u`. The user catches up from it.
 3. **Claim the ticket:** assign it to the user and set it In Progress, unless it already is. Log it.
-4. Name yourself: `herdr agent rename <your-pane> <t>-lead`, and `herdr tab rename` the tab to `<t>`. The user starts you with `--model fable -n <t>-lead`, or you `/rename` (Gotchas). If you are not on Fable, tell the user once: they can switch you with `/model fable`.
+4. Name yourself: `mux.sh name-self <t>-lead <t>` names your pane and your tab. The user starts you with `--model fable -n <t>-lead`, or you `/rename` (Gotchas). If you are not on Fable, tell the user once: they can switch you with `/model fable`.
 5. Three equal columns in your tab, all in **your worktree**. The workers do not make their own.
 
    ```bash
-   herdr pane split <lead-pane> --direction right --cwd <worktree> --no-focus    # → impl pane
-   herdr pane split <impl-pane> --direction right --cwd <worktree> --no-focus    # → rev pane
-   herdr pane resize --direction left --amount 0.17 --pane <impl-pane>           # 1/2,1/4,1/4 → thirds
-   herdr pane run <impl-pane> "<claude-cmd> --model opus -n <t>-impl"
-   herdr pane run <rev-pane>  "<codex-cmd> -m <sol>"
-   <skill-dir>/scripts/wait-agent.sh <impl-pane> claude   # and <rev-pane> codex: herdr's detection, not a screen regex
-   herdr agent rename <pane> <t>-impl          # and <t>-rev; herdr pane rename both too
-   herdr agent prompt <t>-rev "/rename <t>-rev"   # Codex has no name flag and titles a thread from its first prompt
+   mux.sh columns <worktree>                  # prints <impl-pane> <rev-pane>
+   mux.sh start <impl-pane> <t>-impl claude "<claude-cmd> --model opus -n <t>-impl"
+   mux.sh start <rev-pane> <t>-rev codex "<codex-cmd> -m <sol>"
+   mux.sh send <t>-rev "/rename <t>-rev"      # Codex has no name flag and titles a thread from its first prompt
    ```
+
+   `start` types the command into the pane's shell, waits until the agent is ready, then names the pane and the agent.
 
    `<claude-cmd>` is `$ORCH_CLAUDE_CMD` if it is set (the user's bypass alias), else `claude --dangerously-skip-permissions`. `<codex-cmd>` is `$ORCH_CODEX_CMD`, else `codex --dangerously-bypass-approvals-and-sandbox`. Read the variables with `echo`, then pass the literal text. The pane's interactive shell expands the aliases.
 
@@ -47,10 +47,10 @@ Each role runs the latest release of its model, unless the user names another on
 ## Protocol
 
 - **Every handoff is a file in the folder,** and each message you send names the file to write. The worker prints the file in its chat word for word, because the user reads the chats, then ends its turn. Workers message nobody: every finding passes your filter.
-- **Send in the background and let herdr wake you:** `herdr agent prompt <worker> "[<t>-lead] <one line>" --wait --timeout 3600000`, run in the background, then **end your turn**. The prompt must start a turn within 5 s (else `agent_prompt_stalled`), and the call returns when the worker settles (idle, done or blocked). The send is also the watchdog: no ping to forget or lose, and no race.
-- **When it returns, key on the file**, never on `idle` versus `done`. herdr reads the agent state from the screen, so it can be wrong. And it uses `done` versus `idle` to mean "nobody has looked at the pane yet" versus "someone has", not "finished" versus "not finished". If the file exists, go on. If the state is `blocked`, `herdr agent read` the pane now. Otherwise, run `herdr agent wait <worker> --until working --timeout 120000` in the background as a 2-minute grace window. If the worker starts working again (Codex can settle between its own turns), go back to a settled wait (`herdr agent wait <worker> --timeout 3600000`). If it stays settled for 2 minutes with no file, read the pane, then decide or tell the user. This rule also covers a prompt that never started a turn. A 1-hour timeout is a check-in, not an alarm. Never resend blindly.
+- **Send in the background and let the multiplexer wake you:** `mux.sh prompt <worker> "[<t>-lead] <one line>" 3600`, run in the background, then **end your turn**. The prompt must start a turn within 5 s, and the call returns when the worker settles (idle, done or blocked) and prints its state. The send is also the watchdog: no ping to forget or lose, and no race.
+- **When it returns, key on the file**, never on `idle` versus `done`. herdr reads the agent state from the screen, so it can be wrong. And under herdr, `done` versus `idle` means "nobody has looked at the pane yet" versus "someone has", not "finished" versus "not finished". If the file exists, go on. If the state is `blocked`, `mux.sh read <worker>` now. Otherwise, run `mux.sh wait <worker> working 120` in the background as a 2-minute grace window. If the worker starts working again (Codex can settle between its own turns), go back to a settled wait (`mux.sh wait <worker> settled 3600`). If it stays settled for 2 minutes with no file, read the pane, then decide or tell the user. This rule also covers a prompt that never started a turn. A 1-hour timeout is a check-in, not an alarm. Never resend blindly.
 - **Message a worker only after its turn ended.** On Codex, Enter during a turn steers that turn.
-- **No dialogs in any pane:** no AskUserQuestion, and no plan mode for the implementer. herdr rejects a prompt to a pane with a dialog (`agent_blocked`), and the loop then waits on the user. Questions go into the files.
+- **No dialogs in any pane:** no AskUserQuestion, and no plan mode for the implementer. `mux.sh prompt` refuses a pane with a dialog (`blocked`), and the loop then waits on the user. Questions go into the files.
 
 ## The loop
 
@@ -66,7 +66,7 @@ Each role runs the latest release of its model, unless the user names another on
 5. **User decisions that add scope** go out with your next relay, not in the middle of a review, so the reviewer reviews one version.
 6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user. Decide the blind reviewer now, before any code exists, and log it: it is on unless the contract is docs only or tests only. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, the output of each contract check, any difference from the contract and why).
 7. **PR review:** the same loop with `pr-review-N.md`, `lead-pr-N.md` and `pr-response-N.md`. The reviewer also checks the PR against the agreed kickoff: anything agreed but missing, anything built but not agreed. Do not drop a finding only because it contradicts the ticket, the contract or an earlier decision: drop it with evidence, and send a product call to the user.
-8. **Blind reviewer**, unless you skipped it at step 6 and the PR still matches that docs- or tests-only contract. When `pr-ready.md` lands, make `<dir>-blind/` next to the loop folder (no path to the plan), write `brief-blind.md` there from [briefs.md](briefs.md), split the reviewer's pane down, start `<codex-cmd> -m <sol>`, name it `<t>-blind` as in Setup, and send the brief with the reviewer's round 1. It then runs the loop like the reviewer, writing `pr-blind-N.md` in its folder. Relay once per round, when both reviews are in, and stop sending rounds to a reviewer with no open findings. If the blind reviewer stalls past the grace window, go on without it and log it. The stage ends when both are done.
+8. **Blind reviewer**, unless you skipped it at step 6 and the PR still matches that docs- or tests-only contract. When `pr-ready.md` lands, make `<dir>-blind/` next to the loop folder (no path to the plan), write `brief-blind.md` there from [briefs.md](briefs.md), split the reviewer's pane down (`mux.sh split-below <rev-pane> <worktree>`), start `<codex-cmd> -m <sol>` there as `<t>-blind` as in Setup, and send the brief with the reviewer's round 1. It then runs the loop like the reviewer, writing `pr-blind-N.md` in its folder. Relay once per round, when both reviews are in, and stop sending rounds to a reviewer with no open findings. If the blind reviewer stalls past the grace window, go on without it and log it. The stage ends when both are done.
 9. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.
 
 ## Steps that need the user
@@ -83,14 +83,14 @@ The implementer runs these steps because an isolated lead cannot run git in othe
 
 ## End
 
-Stop your background waits (TaskStop) first, or each one fails with `agent_not_running`. Then close the worker panes you created (`herdr pane close`); their sessions stay on disk. If the proof needs time (for example a soak week), schedule it with `follow-up-check`. Give the user the result and the open items. Name the class of problem the ticket belongs to, and if one follow-up would remove the class, propose it; don't build it.
+Stop your background waits (TaskStop) first, or each one fails when its pane closes. Then close the worker panes you created (`mux.sh close <pane>`); their sessions stay on disk. If the proof needs time (for example a soak week), schedule it with `follow-up-check`. Give the user the result and the open items. Name the class of problem the ticket belongs to, and if one follow-up would remove the class, propose it; don't build it.
 
 ## Gotchas
 
 - **An isolated lead** (started with `--worktree`) cannot run some Bash calls. Its harness refuses a call that puts a runtime value (`$VAR`, `$(…)`) next to `herdr` or `git`, or that pipes into an interpreter. Use literal ids, one plain command per call, and put scripts in files. It also refuses git in another repo's checkout, so the implementer runs those steps.
 - **Codex started through its app-server daemon** runs shell commands in the daemon's environment, so pane `--env` variables are missing. Briefs must carry literal paths and names.
-- **`herdr pane move`** stops every open `agent wait` or `prompt --wait` on that agent (`agent_not_running`). Start the waits again after a move.
-- **Do not wait for an agent with a screen regex.** `herdr pane wait-output` also matches text already on the screen, and a shell prompt can use the same glyph as the agent (`❯`). Use `scripts/wait-agent.sh`.
-- **A slash command** sent to a busy Claude pane arrives as plain text. Send `/rename` only when the pane is idle. To rename yourself, run this in the background: `herdr agent wait <t>-lead --until idle --until done && herdr agent prompt <t>-lead "/rename <t>-lead"`.
-- **Read files, not panes.** `agent read` shows stale lines when a Codex pane is scrolled.
+- **`herdr pane move`** stops every open wait on that agent (`agent_not_running`). Start the waits again after a move.
+- **Do not wait for an agent with a screen regex.** `herdr pane wait-output` also matches text already on the screen, and a shell prompt can use the same glyph as the agent (`❯`). `mux.sh start` waits on the agent state.
+- **A slash command** sent to a busy Claude pane arrives as plain text. Send `/rename` only when the pane is idle. To rename yourself, run this in the background: `mux.sh wait <t>-lead settled && mux.sh send <t>-lead "/rename <t>-lead"`.
+- **Read files, not panes.** `mux.sh read` shows stale lines when a Codex pane is scrolled.
 - **Phone pings:** PushNotification reaches the phone only if mobile push is on in `/config`. Check this at setup. Without it, `log.md` and the chats are the record.
