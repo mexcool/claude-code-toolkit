@@ -1,6 +1,6 @@
 ---
 name: ticket-orchestrator
-description: "Run one ticket end to end with two worker agents in herdr, Rex or herdr-app panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. The multiplexer's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1), Rex (REX_SESSION) or the herdr app (HC_TERMINAL_ID)."
+description: "Run one ticket end to end with two worker agents in herdr, Rex or herdr-app panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. The multiplexer's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. To run several such loops as their parent, read parent.md in the skill folder. Needs herdr (HERDR_ENV=1), Rex (REX_SESSION) or the herdr app (HC_TERMINAL_ID)."
 version: 0.1.0
 ---
 
@@ -80,6 +80,16 @@ These are merge, apply, deploy, test pages, product decisions, and posts outside
 The implementer runs these steps because an isolated lead cannot run git in other checkouts (Gotchas). A test page starts an escalation clock. Send it only when the person who must acknowledge it is at the screen, and give them the deadline at once.
 
 **A PR that must not close a multi-PR ticket:** Linear links a bare ticket id in a branch name, title or body as "closes", and the merge then closes the ticket. Tell the implementer, in the brief, to make the first line of the PR body `Part of PROJ-123` and to keep the id out of the branch name. "Part of" is one of Linear's contributing words (also "ref", "towards", "contributes to"), so the link is `contributes` and the id can stay in the title. When the PR opens, check the issue's attachment `metadata.linkKind`. If it is `closes`, fix the body and check again.
+
+## When a parent started you
+
+Your first prompt or brief names a **parent**: another session that runs several loops and stands between you and the user. Its side is in [parent.md](parent.md).
+
+- Each step that needs the user goes to the parent, not to the user. Write the question and wait for the answer.
+- Report one line at each event: started (where you run, your workers), kickoff agreed, PR ready, review done, each step that needs the user, done. Also one line for a finding outside your ticket; keep it out of your PR.
+- The channel is the one the brief names. A file: append one line with the UTC time from `date -u` (never from memory), the ticket id, the event word, one sentence, and the path of the file with the details. Under the herdr app you can instead send the same line with `hc send <parent> "<line>"`.
+- An answer is a file or a message with what is authorized, what is not, and stop conditions. Do what it says and no more. An approval covers the head and the content it names: a new head or a new push needs a new answer.
+- Before a merge question, say in the line whether a review bot or a person approved, and whether `mergeable` is clean.
 
 ## End
 
