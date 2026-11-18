@@ -115,8 +115,9 @@ hc_mux() {
         ((SECONDS < deadline)) || { echo "mux: no ready $4 agent in $2 after 60s" >&2; exit 1; }
         sleep 1
       done ;;
-    # hc can't name an app tab: the app names a tab after its agent's session title (-n, /rename).
-    name-self) hc label "$HC_TERMINAL_ID" "mux.name=$2" >/dev/null ;;
+    # hc can't rename an app tab, and herdr-app runs only on the machine with the window. The
+    # tab-names mod in that window renames the tab from the tab.name label (herdr-extensions).
+    name-self) hc label "$HC_TERMINAL_ID" "mux.name=$2" "tab.name=$3" >/dev/null ;;
     send) t=$(hc_addr "$2") && hc send "$t" "$3" ;;
     prompt) # a send to a blocked terminal fails without --force: the wanted refusal
       t=$(hc_addr "$2") && hc send --wait --timeout "${4:-3600}" --json "$t" "$3" | jq -er .wait.status ;;
