@@ -1,6 +1,6 @@
 ---
 name: ticket-orchestrator
-description: "Run one ticket end to end with two worker agents in herdr or Rex panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. The multiplexer's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1) or Rex (REX_SESSION)."
+description: "Run one ticket end to end with two worker agents in herdr, Rex or herdr-app panes: a Claude implementer (ticket kickoff, then code and PR) and a Codex reviewer (kickoff review, then PR review), plus, by default, a second Codex reviewer at the PR stage whose first round is blind: it never gets the plan. You are the lead: you relay files, sort review findings, decide disputes and run the steps that need the user. The multiplexer's agent state wakes you when a worker's turn ends, so nobody watches the panes. Use when asked to orchestrate a ticket, to run the kickoff and review loop, or to automate the implementer-reviewer back-and-forth. Needs herdr (HERDR_ENV=1), Rex (REX_SESSION) or the herdr app (HC_TERMINAL_ID)."
 version: 0.1.0
 ---
 
@@ -19,7 +19,7 @@ You are the **lead**. You do not implement or review. Your two jobs that matter 
 
 Each role runs the latest release of its model, unless the user names another one. Claude Code's `fable` and `opus` aliases follow the latest release. Codex has no alias, so you look up the newest Sol at Setup.
 
-**herdr or Rex.** Make every pane and agent call through `mux.sh` (`<skill-dir>/scripts/mux.sh`; run it with no arguments for its commands). It uses herdr when `HERDR_ENV=1`, else Rex when `REX_SESSION` is set, so this skill reads the same under both. One difference: herdr reads an agent's state from its screen, while under Rex the agent reports its own state.
+**herdr, Rex or the herdr app.** Make every pane and agent call through `mux.sh` (`<skill-dir>/scripts/mux.sh`; run it with no arguments for its commands). It uses herdr when `HERDR_ENV=1`, else Rex when `REX_SESSION` is set, else the herdr app (herdr-core, `hc`) when `HC_TERMINAL_ID` is set, so this skill reads the same under all three. One difference: herdr reads an agent's state from its screen, while under Rex and the herdr app the agent reports its own state. The app has no panes of its own, so a worker is a terminal named by a `mux.name` label, and the app names the lead's tab after the session title (`-n`, `/rename`).
 
 ## Setup
 

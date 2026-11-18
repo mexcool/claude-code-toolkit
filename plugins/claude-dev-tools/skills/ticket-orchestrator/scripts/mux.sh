@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Every pane and agent call the lead makes, on herdr (HERDR_ENV=1) or Rex (REX_SESSION set).
+# Every pane and agent call the lead makes, on herdr (HERDR_ENV=1), Rex (REX_SESSION set) or
+# herdr-core, the herdr app's terminal engine (HC_TERMINAL_ID set).
 # herdr wins when both are set: a herdr started from a Rex terminal inherits REX_SESSION, and the
-# pane belongs to herdr. Agent state comes from herdr's screen detection, or under Rex from the
-# status the agent reports itself (OSC 7501). After `start`, the name works wherever <agent> is asked.
+# pane belongs to herdr. Agent state comes from herdr's screen detection, or under Rex and herdr-core
+# from the status the agent reports itself (OSC 7501). After `start`, the name works wherever <agent> is asked.
 set -o pipefail
 
 usage() {
@@ -82,6 +83,62 @@ rex_mux() {
   esac
 }
 
+# herdr-core (hc): terminal addresses (t11) stand in for pane ids. hc can't rename a terminal, so the
+# worker's name is a label, mux.name=<name>, and every <agent> resolves through it.
+hc_addr() {
+  if [[ $1 =~ ^([a-z0-9_-]+/)?t[0-9]+$ ]]; then echo "$1"
+  else hc ls --json --label "mux.name=$1" | jq -er '.terminals[0].address' || { echo "mux: no terminal named $1" >&2; return 1; }; fi
+}
+
+hc_shell() { # <cwd>: a plain shell next to the lead, in the lead's app tab when the lead has one
+  local labels=() l
+  while read -r l; do labels+=(--label "$l"); done < <(hc get "$HC_TERMINAL_ID" --json |
+    jq -r '(.labels // {}) | to_entries[] | select(.key == "herdr.space" or .key == "herdr.tab") | "\(.key)=\(.value)"')
+  hc run --bg --json --cwd "$1" --outlive-parent --no-notify "${labels[@]}" | jq -er .address
+}
+
+hc_mux() {
+  local t
+  case $1 in
+    columns)
+      impl=$(hc_shell "$2") || exit
+      rev=$(hc_shell "$2") || exit
+      echo "$impl $rev" ;;
+    split-below) hc_shell "$3" ;;
+    start)
+      app=$4; [[ $app == claude ]] && app=claude-code
+      hc label "$2" "mux.name=$3" >/dev/null || exit
+      hc send "$2" "$5" >/dev/null || exit
+      deadline=$((SECONDS + 60))
+      until json=$(hc get "$2" --json 2>/dev/null) &&
+        jq -e --arg a "$app" '.status.app == $a and (.status.state | IN("idle", "done"))' <<<"$json" >/dev/null; do
+        ((SECONDS < deadline)) || { echo "mux: no ready $4 agent in $2 after 60s" >&2; exit 1; }
+        sleep 1
+      done ;;
+    # hc can't name an app tab: the app names a tab after its agent's session title (-n, /rename).
+    name-self) hc label "$HC_TERMINAL_ID" "mux.name=$2" >/dev/null ;;
+    send) t=$(hc_addr "$2") && hc send "$t" "$3" ;;
+    prompt) # a send to a blocked terminal fails without --force: the wanted refusal
+      t=$(hc_addr "$2") && hc send --wait --timeout "${4:-3600}" --json "$t" "$3" | jq -er .wait.status ;;
+    wait)
+      t=$(hc_addr "$2") || exit
+      if [[ $3 == working ]]; then
+        # .turn changes when a turn runs, so a turn that starts and ends between two polls still counts
+        deadline=$((SECONDS + ${4:-3600}))
+        turn=$(hc get "$t" --json | jq -er .turn) || exit
+        until json=$(hc get "$t" --json) && jq -e --argjson n "$turn" '.status.state == "working" or .turn != $n' <<<"$json" >/dev/null; do
+          ((SECONDS < deadline)) || { echo "mux: $2 not working after ${4:-3600}s" >&2; exit 1; }
+          sleep 1
+        done
+        echo working
+      else hc wait "$t" --timeout "${4:-3600}" --json | jq -er .status; fi ;;
+    read) t=$(hc_addr "$2") && hc read "$t" --lines 120 ;;
+    close) t=$(hc_addr "$2") && hc kill "$t" ;;
+    *) usage ;;
+  esac
+}
+
 if [[ ${HERDR_ENV:-} == 1 ]]; then herdr_mux "$@"
 elif [[ -n $S ]]; then rex_mux "$@"
-else echo "mux: run inside herdr (HERDR_ENV=1) or Rex (REX_SESSION)" >&2; exit 1; fi
+elif [[ -n ${HC_TERMINAL_ID:-} ]]; then hc_mux "$@"
+else echo "mux: run inside herdr (HERDR_ENV=1), Rex (REX_SESSION) or the herdr app (HC_TERMINAL_ID)" >&2; exit 1; fi

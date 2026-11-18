@@ -202,13 +202,13 @@ section{display:flex;flex-direction:column;gap:24px}
   <div class="hero-text">
     <p class="eyebrow">claude-dev-tools · skill</p>
     <h1>Ticket orchestrator</h1>
-    <p class="lede">One ticket, one worktree, one herdr or Rex tab. A Claude lead passes files between a Claude implementer and Codex reviewers, sorts what the reviewers find, and comes back to you only for the steps that need a person.</p>
+    <p class="lede">One ticket, one worktree, one herdr, Rex or herdr-app tab. A Claude lead passes files between a Claude implementer and Codex reviewers, sorts what the reviewers find, and comes back to you only for the steps that need a person.</p>
   </div>
   <div class="start">
     <div class="start-label">How a run starts</div>
     <pre class="cmd"><span class="p">$</span> claude --worktree --model fable -n proj-123-lead
 <span class="p">&gt;</span> orchestrate PROJ-123</pre>
-    <p class="note">Needs herdr or Rex. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed. The lead runs on Fable, the implementer on Opus and both reviewers on Sol: the latest release of each, unless you name another model.</p>
+    <p class="note">Needs herdr, Rex or the herdr app. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed. The lead runs on Fable, the implementer on Opus and both reviewers on Sol: the latest release of each, unless you name another model.</p>
   </div>
 </header>
 
@@ -338,12 +338,12 @@ section{display:flex;flex-direction:column;gap:24px}
   <div class="rules">
     <div class="rule"><h3>Every handoff is a file</h3><p>Each message from the lead names the file to write. The worker also prints it word for word in its chat, so you can read along in the apps, or catch up later from <code>log.md</code>.</p></div>
     <div class="rule"><h3>Workers talk only to the lead</h3><p>No worker messages another. Every finding goes through the lead's sort before it reaches the implementer, which is what keeps scope from growing each round.</p></div>
-    <div class="rule"><h3>The multiplexer wakes the lead</h3><p>The lead sends with <code>mux.sh prompt &lt;worker&gt; "…"</code> in the background and ends its turn. The call returns when the worker's turn ends: herdr reads that from the screen, and under Rex the agent reports it. The lead then looks for the file, since the state can be wrong. No file yet means a two-minute grace window, then a look at the pane.</p></div>
+    <div class="rule"><h3>The multiplexer wakes the lead</h3><p>The lead sends with <code>mux.sh prompt &lt;worker&gt; "…"</code> in the background and ends its turn. The call returns when the worker's turn ends: herdr reads that from the screen, and under Rex and the herdr app the agent reports it. The lead then looks for the file, since the state can be wrong. No file yet means a two-minute grace window, then a look at the pane.</p></div>
     <div class="rule"><h3>No dialogs in any pane</h3><p>A pane with an open dialog cannot take a prompt, so the loop would stall until you came back. Workers write their questions into their files instead.</p></div>
   </div>
 </section>
 
-<footer class="foot">Matches the skill as of claude-dev-tools 2.2.0. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
+<footer class="foot">Matches the skill as of claude-dev-tools 2.3.0. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
 
 </div>
 
