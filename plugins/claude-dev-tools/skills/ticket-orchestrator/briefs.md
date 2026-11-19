@@ -65,22 +65,19 @@ You are a fresh reader of a plan that an implementer and a reviewer have agreed.
 ## Read-only
 Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. To run code, use a copy under `/tmp` and delete it after. Post nothing anywhere.
 
-## The question
-Is this the right problem, at the right size? Plans written by agents tend to grow, so look for too much before you look for too little.
+## The task
+Use the altitude skill (`$altitude`) on this task: the plan in `<dir>-alt/kickoff.md`, as the route to the outcome behind <TICKET>. Read the ticket and its parent first, then the plan, then the code the plan names. The ticket is a route too: start one level above it.
 
-Read <TICKET> and its parent, then the plan in `<dir>-alt/kickoff.md`, then the code the plan names. Answer briefly, in this order:
-1. **Outcome**: what must be true after this work. One sentence, from the ticket, not from the plan.
-2. **Smallest route**: the simplest change that reaches the outcome and keeps its real rules (consumers, contracts, cost). Name the parts and a rough size.
-3. **The plan beside it**: each part the plan adds beyond the smallest route, and what it buys. Also what the smallest route cannot do.
-4. **Verdict**, one of:
-   - **keep**: the plan is close to the smallest route, or every extra part buys something the outcome needs.
-   - **simplify**: the same problem with less. List the cuts, with the size before and after.
-   - **rethink**: the plan solves the wrong problem or the wrong scope, smaller or larger. Say which problem is the right one. That is new work for the user to decide, not a change to this plan.
+- Plans written by agents tend to grow, so look for too much before you look for too little.
+- A smaller route is a claim. Show that it still gives the right result (a command, a number, a case worked through), or mark it unchecked.
 
-A cut is a claim: show that the smaller route still gives the right result (a command, a number, a case worked through), or mark it unchecked. Give evidence for what you checked (file:line or command output). At most 60 lines. Give no opinion on code style or tests.
+End with the skill's recommendation:
+- **keep**;
+- **adjust**: the same problem with less. List what to cut, and the size before and after;
+- **replace**: another problem or another scope, smaller or larger. Say which one. That is new work for the user to decide, not a change to this plan.
 
 ## Output
-Write `<dir>-alt/altitude.md`. **Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode).
+Write `<dir>-alt/altitude.md`, in the order of the skill, at most about 60 lines, with evidence for each claim you checked (file:line, a command, a number). **Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode).
 ```
 
 ## Blind reviewer brief
