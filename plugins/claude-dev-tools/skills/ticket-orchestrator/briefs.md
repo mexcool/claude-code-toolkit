@@ -66,6 +66,8 @@ You are a fresh reader of a plan that an implementer and a reviewer have agreed.
 Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. To run code, use a copy under `/tmp` and delete it after. Post nothing anywhere.
 
 ## The task
+Is this the right problem, at the right size?
+
 $altitude /altitude
 
 Use the altitude skill on this task: the plan in `<dir>-alt/kickoff.md`, as the route to the outcome behind <TICKET>. Read the ticket and its parent first, then the plan, then the code the plan names. The ticket is a route too: start one level above it.
@@ -79,7 +81,7 @@ End with the skill's recommendation:
 - **replace**: another problem or another scope, smaller or larger. Say which one. That is new work for the user to decide, not a change to this plan.
 
 ## Output
-Write `<dir>-alt/altitude.md`, in the order of the skill, at most about 60 lines, with evidence for each claim you checked (file:line, a command, a number). **Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode).
+Write `<dir>-alt/altitude.md`, in the order of the skill, with evidence for each claim you checked (file:line, a command, a number). **Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode).
 ```
 
 ## Blind reviewer brief
