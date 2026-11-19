@@ -66,7 +66,9 @@ You are a fresh reader of a plan that an implementer and a reviewer have agreed.
 Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. To run code, use a copy under `/tmp` and delete it after. Post nothing anywhere.
 
 ## The task
-Use the altitude skill (`$altitude`) on this task: the plan in `<dir>-alt/kickoff.md`, as the route to the outcome behind <TICKET>. Read the ticket and its parent first, then the plan, then the code the plan names. The ticket is a route too: start one level above it.
+$altitude /altitude
+
+Use the altitude skill on this task: the plan in `<dir>-alt/kickoff.md`, as the route to the outcome behind <TICKET>. Read the ticket and its parent first, then the plan, then the code the plan names. The ticket is a route too: start one level above it.
 
 - Plans written by agents tend to grow, so look for too much before you look for too little.
 - A smaller route is a claim. Show that it still gives the right result (a command, a number, a case worked through), or mark it unchecked.
