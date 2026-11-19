@@ -1,6 +1,6 @@
 # Brief templates
 
-Fill in `<t>`, `<TICKET>` and `<dir>` (the absolute loop folder path). Write two files: the shared block plus the role block. Add ticket-specific limits under the role, for example "no apply" or "the ticket must stay open". The last two briefs stand alone, so the blind reviewer's round 1 and the consequences reviewer never see the plan.
+Fill in `<t>`, `<TICKET>` and `<dir>` (the absolute loop folder path). Write two files: the shared block plus the role block. Add ticket-specific limits under the role, for example "no apply" or "the ticket must stay open". The last three briefs stand alone: the altitude reader sees the plan but no review, and the blind reviewer's round 1 and the consequences reviewer never see the plan.
 
 ## Shared block (both briefs)
 
@@ -51,6 +51,36 @@ Use the PR review skill on the PRs in `pr-ready.md`. Also check them against the
 ## Output, every round
 One entry per finding: id (`K1`… for the kickoff, `P1`… for the PR); severity (`must-fix` = wrong behaviour, an unmet ticket requirement or security; `should-fix` = real and small; `nit`); what is wrong; evidence (file:line or command); the minimum fix. End with `Verdict: LGTM` or `Verdict: changes needed`. LGTM is a valid answer.
 In later rounds, recheck only your open findings and what changed. Concede when the evidence is right. Raise a new finding only if it is must-fix.
+```
+
+## Altitude reader brief
+
+Write it to `<dir>-alt/brief-alt.md` when the kickoff is agreed, next to a copy of the agreed kickoff as `<dir>-alt/kickoff.md`. It has one round.
+
+```markdown
+# <TICKET> — altitude check brief
+
+You are a fresh reader of a plan that an implementer and a reviewer have agreed. You took no part in it. Lead `<t>-lead` reads your answer and decides what to do with it; its messages start with `[<t>-lead]`.
+
+## Read-only
+Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. To run code, use a copy under `/tmp` and delete it after. Post nothing anywhere.
+
+## The question
+Is this the right problem, at the right size? Plans written by agents tend to grow, so look for too much before you look for too little.
+
+Read <TICKET> and its parent, then the plan in `<dir>-alt/kickoff.md`, then the code the plan names. Answer briefly, in this order:
+1. **Outcome**: what must be true after this work. One sentence, from the ticket, not from the plan.
+2. **Smallest route**: the simplest change that reaches the outcome and keeps its real rules (consumers, contracts, cost). Name the parts and a rough size.
+3. **The plan beside it**: each part the plan adds beyond the smallest route, and what it buys. Also what the smallest route cannot do.
+4. **Verdict**, one of:
+   - **keep**: the plan is close to the smallest route, or every extra part buys something the outcome needs.
+   - **simplify**: the same problem with less. List the cuts, with the size before and after.
+   - **rethink**: the plan solves the wrong problem or the wrong scope, smaller or larger. Say which problem is the right one. That is new work for the user to decide, not a change to this plan.
+
+A cut is a claim: show that the smaller route still gives the right result (a command, a number, a case worked through), or mark it unchecked. Give evidence for what you checked (file:line or command output). At most 60 lines. Give no opinion on code style or tests.
+
+## Output
+Write `<dir>-alt/altitude.md`. **Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode).
 ```
 
 ## Blind reviewer brief
