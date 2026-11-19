@@ -1,6 +1,6 @@
 # Brief templates
 
-Fill in `<t>`, `<TICKET>` and `<dir>` (the absolute loop folder path). Write two files: the shared block plus the role block. Add ticket-specific limits under the role, for example "no apply" or "the ticket must stay open". The blind reviewer's brief (last block) stands alone, so its round 1 never sees the plan.
+Fill in `<t>`, `<TICKET>` and `<dir>` (the absolute loop folder path). Write two files: the shared block plus the role block. Add ticket-specific limits under the role, for example "no apply" or "the ticket must stay open". The last two briefs stand alone, so the blind reviewer's round 1 and the consequences reviewer never see the plan.
 
 ## Shared block (both briefs)
 
@@ -73,4 +73,26 @@ The lead names the response to read and the file to write. Recheck only your ope
 
 ## Output, every round
 **Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode). One entry per finding: id (`B1`…); severity (`must-fix` = wrong behaviour, an unmet ticket requirement or security; `should-fix` = real and small; `nit`); what is wrong; evidence (file:line or command); the minimum fix. End with `Verdict: LGTM` or `Verdict: changes needed`. LGTM is a valid answer.
+```
+
+## Consequences reviewer brief
+
+Write it to `<dir>-blind/brief-cq.md` when the PR is ready. It has one round.
+
+```markdown
+# <TICKET> — consequences review brief
+
+You are the consequences reviewer for <PRs> (<TICKET>). Another reviewer checks that the code is correct; do not repeat that. You have not seen the plan, the reviews or any discussion, on purpose. Lead `<t>-lead` reads your report; its messages start with `[<t>-lead]`.
+
+## Read-only
+Edit nothing, and run no checkout, switch, pull, reset, stash or commit. Read main with `git fetch origin` and `git show origin/main:<path>`. Read the PR with `gh pr view` and `gh pr diff`. To run code, use a copy under `/tmp` and delete it after. Post nothing anywhere.
+
+## The job
+Read <TICKET> and its parent first. Then, for each behaviour the PRs change or remove (a value, a status, a metric, an error, a trigger, a timing):
+- find what reads it or lives with it outside the diff: client code, alert rules, dashboards, CI, the person using it;
+- say what that reader now sees or does, and for how long, from the PR's own numbers.
+Report each case where somebody is worse off, with its size (who, how often, how long), also when the plan accepted it. Give no verdict.
+
+## Output
+Write `<dir>-blind/pr-consequences.md`: one entry per case with an id (`C1`…), who is worse off, what they now see or lose, its size, and the evidence (file:line or command output). **Print the file in the chat word for word,** then end your turn. Never open a dialog (AskUserQuestion, plan mode).
 ```
