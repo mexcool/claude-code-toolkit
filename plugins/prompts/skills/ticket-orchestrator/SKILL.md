@@ -5,11 +5,9 @@ description: "Orchestrate a ticket from kickoff through PR review in the herdr T
 
 # Ticket orchestrator
 
-**Meta-orchestrator.** When asked to supervise ticket leads, follow [parent.md](parent.md). Start one ordinary lead per authorized ticket. Each child gets its own ticket, brief and worktree.
+**One ticket.** This session leads the loop below, including when a parent assigned the ticket to you. The implementer owns the change. You relay handoffs, settle findings, keep scope focused and take steps that need the user only on their word. If the user explicitly asks to hand off the lead to another session or CLI, follow [Starting a lead](parent.md#starting-a-lead). The requested lead then claims the ticket and starts its workers.
 
-**Ticket lead.** For a single ticket, including one assigned by a parent, follow the loop below. The implementer owns the change. You relay handoffs, settle findings, keep scope focused and take steps that need the user only on their word.
-
-**Choose the lead first.** Default to the CLI running this skill. An explicit lead choice takes precedence. If the user selects the other CLI, start the requested lead using [Starting a lead](parent.md#starting-a-lead) and pass it the original request and constraints. Only that lead claims the ticket and starts its workers.
+**Several leads.** When the user asks you to supervise separate ticket leads, follow [parent.md](parent.md). Start one lead per authorized ticket. Each lead gets its own ticket, brief and worktree.
 
 | Role | Name | Claude-led run | Codex-led run | Job |
 |---|---|---|---|---|
@@ -23,16 +21,16 @@ description: "Orchestrate a ticket from kickoff through PR review in the herdr T
 
 ## Model selection
 
-For a Codex parent or ticket lead, run `<skill-dir>/scripts/latest-codex-model.sh astra`. For a Codex implementer or either Codex reviewer, run the same script with `sol`. It prints the newest listed release of that family. Pass the resulting slug with `-m` when starting the session. If lookup fails, resolve the catalog error or get the user's choice before launching that role. Claude's `fable`, `opus` and `sonnet` aliases track the latest releases. An explicit role-specific model takes precedence.
-
-An already-open chat keeps its active model. For a Codex lead or parent on a different model, have the user select the resolved Astra in `/model` before starting, unless they chose the current model for that role. For an existing Claude lead on another model, mention the Fable default once.
+An open lead or parent keeps its current model unless the user asks to change it in that chat. The table gives defaults for new sessions. For a new Codex parent or ticket lead, run `<skill-dir>/scripts/latest-codex-model.sh astra`. For a Codex implementer or either Codex reviewer, run the same script with `sol`. It prints the newest listed release of that family. Pass the resulting slug with `-m` when starting the session. If lookup fails, resolve the catalog error or get the user's choice before launching that role. Claude's `fable`, `opus` and `sonnet` aliases track the latest releases. An explicit role-specific model takes precedence.
 
 **herdr, Rex or the herdr app.** Make every pane and agent call through `mux.sh` (`<skill-dir>/scripts/mux.sh`; run it with no arguments for its commands). It uses herdr when `HERDR_ENV=1`, else Rex when `REX_SESSION` is set, else the herdr app (herdr-core, `hc`) when `HC_TERMINAL_ID` is set, so this skill reads the same under all three. One difference: herdr reads an agent's state from its screen, while under Rex and the herdr app the agent reports its own state. The app has no panes of its own, so a worker is a terminal named by a `mux.name` label. `name-self` names your tab with a `tab.name` label, which the app's `tab-names` mod ([herdr-extensions](https://github.com/mexcool/herdr-extensions/tree/main/tab-names)) turns into the tab's name. Without that mod the tab shows your session title until you exit, and keeps its number as its name.
 
 ## Setup
 
-0. **Use a clean, dedicated worktree.** `git rev-parse --git-dir` must differ from `git rev-parse --git-common-dir`, and `git status` must be clean. Start Claude with `claude --worktree --model fable -n <t>-lead`, or Codex with `codex --no-daemon --worktree -m <resolved-astra>`, inside the intended mux pane. For an existing clean linked worktree, omit `--worktree`. The Codex lead needs the pane's environment, access to the mux socket and write access to `~/ticket-orchestrator/`. For a workspace-write sandbox, create that directory and include `--add-dir ~/ticket-orchestrator` when launching Codex.
-1. Run `mux.sh name-self <t>-lead <t>` to name the pane and tab. If it fails, resolve the mux context before claiming the ticket. For a Codex lead, set the thread title to `<t>-lead` with the title tool when available, or use `/rename <t>-lead` in the idle CLI.
+0. **Use a clean, dedicated worktree.** In the lead's worktree, `git rev-parse --git-dir` must differ from `git rev-parse --git-common-dir`, and `git status` must be clean. The lead needs access to the mux socket and write access to `~/ticket-orchestrator/`. For a new workspace-write Codex session, create that directory and include `--add-dir ~/ticket-orchestrator` at launch.
+1. For a Codex lead, set the thread title to `<t>-lead` with the title tool when available, or use `/rename <t>-lead` in the idle CLI. Run `mux.sh name-self <t>-lead <t>` to name the pane and tab. If it fails, recover the mux context for this same lead before claiming the ticket.
+
+   **Codex in the herdr app.** The app-server daemon can leave `HC_TERMINAL_ID` unset even when the chat is visible in the app. Use `hc ls --json` to list live terminal addresses and `hc get <address> --json` to check their titles and labels. Match the lead thread title and worktree shown in the terminal title. The terminal's `cwd` can still be the directory where Codex started. Use the unique match with `herdr.space` and `herdr.tab` as `HC_TERMINAL_ID` for every `mux.sh` call. The wrapper copies those labels to put workers in the lead's tab. If you cannot verify a unique match, ask the user for the terminal address.
 2. Check Claude usage with `claude-limits` when installed. In a symlinked toolkit checkout, either lead can run `uv run <toolkit>/plugins/claude-dev-tools/skills/claude-limits/scripts/claude-limits.py`. If usage is unavailable, ask for the user's budget decision before starting paid work. Do not start into paid overage without their word.
 3. Make `~/ticket-orchestrator/<TICKET>/` and start `log.md` with one line per event, time from `date -u`.
 4. **Claim the ticket.** Assign it to the user and set it In Progress, unless it already is. Log it.
