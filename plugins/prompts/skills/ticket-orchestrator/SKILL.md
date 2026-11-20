@@ -1,6 +1,6 @@
 ---
 name: ticket-orchestrator
-description: "Orchestrate a ticket from kickoff through PR review in the herdr TUI, herdr app or Rex. The lead and implementer use the selected CLI (Claude Code or Codex), with independent reviewers in the other CLI. Use when asked to run the implementer/reviewer loop for one ticket or act as a meta-orchestrator supervising ticket leads."
+description: "Orchestrate a ticket from kickoff through PR review in the herdr TUI, herdr app or Rex. The lead and implementer use the selected CLI (Claude Code or Codex), with an independent reviewer in the other CLI and a blind reviewer at the PR stage. Use when asked to run the implementer/reviewer loop for one ticket or act as a meta-orchestrator supervising ticket leads."
 ---
 
 # Ticket orchestrator
@@ -16,7 +16,7 @@ description: "Orchestrate a ticket from kickoff through PR review in the herdr T
 | Lead | `<t>-lead` | Claude Fable | Codex Astra | Relay, decide and log |
 | Implementer | `<t>-impl` | Claude Opus | Codex Sol | Ticket kickoff, code, PR and CI |
 | Reviewer | `<t>-rev` | Codex Sol | Claude Opus | Kickoff review and PR review, read-only |
-| Blind reviewer | `<t>-blind` | Codex Sol | Claude Opus | Independent PR review, first round from the ticket and PR alone |
+| Blind reviewer | `<t>-blind` | Codex Sol | Codex Sol | Independent PR review, first round from the ticket and PR alone |
 | Consequences reviewer | `<t>-cq` | Claude Sonnet | Claude Sonnet | One read-only report on who is worse off, without the plan |
 
 `<t>` is the lowercase ticket id (`proj-123`). Use the same name for each pane, agent and session. Log the chosen lineup at setup.
@@ -64,25 +64,26 @@ An already-open chat keeps its active model. For a Codex lead or parent on a dif
 ## The loop
 
 1. **Kickoff.** The implementer writes `ticket-kickoff.md`. It ends with a **Contract**: the files it will change, the rough diff size, the "Done when" items this PR closes with the check for each, and what is out of scope. The reviewer writes `kickoff-review-N.md`. Each finding has an id, a severity, evidence and a minimum fix, and the file ends with a verdict.
-2. **Sort every finding** into `lead-kickoff-N.md`, with your decision on each one:
+2. **Sort every finding** into `lead-kickoff-N.md`, with your decision on each one. Sort also what a review reports without calling it a finding: an accepted limit, a note, "no fix needed". There are four decisions and no others:
    - **must-fix** (wrong behaviour, a ticket requirement not met, security): relay.
    - **should-fix**, if it is small and inside the contract: relay.
-   - **user call**: real, and somebody pays for it (a user waits, an operator loses a signal, old data looks current), but the fix is outside the contract or the plan accepted the cost. Do not relay it and do not drop it: log it with who pays and for how long, for the user to decide.
-   - **drop**: nits, style, "you could also", edge cases that cannot happen, new abstractions, extra docs, speculative tests (a test that checks a contract item or measures an accepted risk is not speculative). List the drops in the file and in the log.
+   - **user call**: real, and somebody pays for it (a user waits, an operator loses a signal, old data looks current), but the fix is outside the contract or the plan accepted the cost. Do not relay it and do not drop it. Log one call per case: who sees what, whether this change introduces it, the smallest fix and its cost, and what you would do. Only the user accepts a cost: "rare", "fails safely" and "expected" are reasons to give the user, not decisions.
+   - **drop**: nits, style, "you could also", edge cases that cannot happen (name the line or the command that shows it), a cost the ticket itself asks for, new abstractions, extra docs, speculative tests (a test that checks a contract item or measures an accepted risk is not speculative). List the drops in the file and in the log.
 
    The implementer updates the kickoff in place. It answers in `kickoff-response-N.md`: **accepted** (what changed) or **push back** (with evidence). Pushing back is normal.
 3. **Later rounds:** the reviewer rechecks only its open findings and what changed. It raises a new finding only if it is must-fix. Allow one exchange per disagreement. After that, decide from the ticket and the code.
 4. **When a stage ends:** at LGTM, at a round with nothing to relay, or when a point comes back without new evidence. There is no hard limit. If a stage reaches round 3, log why and tell the user.
 5. **User decisions that add scope** go out with your next relay, not in the middle of a review, so the reviewer reviews one version.
-6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user, and list the open user calls. Decide the blind reviewer and the consequences reviewer now, before any code exists, and log it: both are on unless the contract is docs only or tests only. The implementer builds, opens the PR ready for review, gets CI green, and writes `pr-ready.md` (links, the output of each contract check, any difference from the contract and why).
+6. **The kickoff is agreed** when both workers agree. There is no plan gate for the user. Tell the user, and list the open user calls. Decide the blind reviewer and the consequences reviewer now, before any code exists, and log it: both are on unless the contract is docs only or tests only. The implementer builds, opens the PR as a draft, gets CI green, and writes `pr-ready.md` (links, the output of each contract check, any difference from the contract and why).
 7. **PR review:** the same loop with `pr-review-N.md`, `lead-pr-N.md` and `pr-response-N.md`. The reviewer also checks the PR against the agreed kickoff: anything agreed but missing, anything built but not agreed. Do not drop a finding only because it contradicts the ticket, the contract or an earlier decision: drop it with evidence, or make it a user call.
 8. **Blind reviewer**, unless you skipped it at step 6 and the PR still matches that docs- or tests-only contract. When `pr-ready.md` lands, make `<dir>-blind/` next to the loop folder (no path to the plan), write `brief-blind.md` there from [briefs.md](briefs.md), split the reviewer's pane down (`mux.sh split-below <rev-pane> <worktree>`), start `<t>-blind` there using its CLI and model from the table, and send the brief with the reviewer's round 1. It then runs the loop like the reviewer, writing `pr-blind-N.md` in its folder. Relay once per round, when both reviews are in, and stop sending rounds to a reviewer with no open findings. If the blind reviewer stalls past the grace window, go on without it and log it. The stage ends when both are done.
 9. **Consequences reviewer**, on and off together with the blind reviewer. It has another job than the two reviewers, and another model: it does not look for bugs, it reports who is worse off by each behaviour the PR changes. When `pr-ready.md` lands, check the usage limits again (Setup 2), write `brief-cq.md` in `<dir>-blind/` from [briefs.md](briefs.md), split the implementer's pane down (`mux.sh split-below <impl-pane> <worktree>`), start `<t>-cq` there using its CLI and model from the table, and send the brief. It writes `pr-consequences.md` once: no verdict, no later rounds. Sort each entry like a finding; most are user calls. Close its pane once the report is sorted. If it stalls past the grace window, go on without it and log it.
-10. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.
+10. **Ready for review.** People read a PR from the moment it is ready, and what you left open comes back as their review. So when the review stage ends, get the user's answer on each open user call: fix now, a ticket, or accept. Relay each "fix now" as one more round. Then the implementer lists each accepted cost with its reason in the PR description and marks the PR ready (`gh pr ready`). Checks that skip a draft run from here.
+11. **Done** means: the "Done when" items that this PR owns are met, and the repo's merge gate is green. A silent reviewer does not mean done.
 
 ## Steps that need the user
 
-These are merge, apply, deploy, test pages, product decisions, and posts outside the PR (tracker, chat, GitHub reviews). Ask in plain text. Before you ask for a merge, read `gh pr diff` yourself and check it against the contract. The reviewer's LGTM does not replace your own read. Get the user's answer on each open user call first: fix now, a ticket, or accept. When the user says yes, give the step to the implementer in `lead-ops-N.md` with stop conditions:
+These are merge, apply, deploy, test pages, product decisions, and posts outside the PR (tracker, chat, GitHub reviews). Ask in plain text. Before you ask for a merge, read `gh pr diff` yourself and check it against the contract. The reviewer's LGTM does not replace your own read. A user call that came up after the PR went ready needs the user's answer first. When the user says yes, give the step to the implementer in `lead-ops-N.md` with stop conditions:
 - pin the reviewed head: `gh pr merge --squash --match-head-commit <sha>`, never `--admin`;
 - give the expected plan summary: `terraform plan -out`, then apply that saved plan;
 - stop at the first failure;

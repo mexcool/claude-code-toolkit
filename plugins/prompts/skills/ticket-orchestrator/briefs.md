@@ -24,7 +24,7 @@ Loop folder: `<dir>`
 Run the ticket kickoff skill on <TICKET>. No code yet. Write `ticket-kickoff.md`, ending with `## Contract`: the files you will change and the rough diff size, the "Done when" items this PR closes with the check for each (and the steps left after merge), and what is out of scope.
 
 ## Stage 2 — build (after the lead says the kickoff is agreed)
-You alone change the shared worktree. Make a branch from the latest origin/main; never `git stash`. Follow the repo's rules for commits, PRs and checks. Open the PR ready for review, get CI green, and write `pr-ready.md`: links, the output of each contract check, and any difference from the contract with the reason.
+You alone change the shared worktree. Make a branch from the latest origin/main; never `git stash`. Follow the repo's rules for commits, PRs and checks. Open the PR as a draft, get CI green, and write `pr-ready.md`: links, the output of each contract check, and any difference from the contract with the reason.
 
 ## Replying to findings
 Answer in the file the lead names. For each finding: **accepted** (what changed) or **push back** (evidence: file:line, command output, ticket text). Push back when the finding is wrong.
