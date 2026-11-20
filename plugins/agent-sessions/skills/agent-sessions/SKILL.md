@@ -1,7 +1,7 @@
 ---
 name: agent-sessions
 description: "Find, search, and resume Claude Code and Codex agent sessions after a terminal or multiplexer dies. Use when asked to recover lost agents, find which session worked on a ticket or PR, list what ran recently, or produce copy-paste commands to cd into a worktree and resume the right session."
-version: 0.2.1
+version: 0.3.0
 ---
 
 # Agent Sessions
@@ -83,13 +83,13 @@ If the user launches these CLIs through wrapper aliases (extra flags, a differen
 
 ## Multiplexers
 
-Agents are usually hosted in a multiplexer — tmux, cmux, or herdr. When one dies its agents normally survive as orphaned processes, so a failing `tmux ls` is not proof the work is gone. Check `ps` first; `list` does.
+Agents are usually hosted in a multiplexer — tmux, cmux, herdr or the herdr app. When one dies its agents normally survive as orphaned processes, so a failing `tmux ls` is not proof the work is gone. Check `ps` first; `list` does.
 
-`list` folds in `herdr agent list` when that binary is present. There, `herdr tab list` shows every tab and marks dead agents as `agent_status: "unknown"` — those are the ones that need resuming.
+`list` folds in `herdr agent list` when that binary is present. There, `herdr tab list` shows every tab and marks dead agents as `agent_status: "unknown"` — those are the ones that need resuming. It also folds in `hc ls` when the herdr app's core (`hc`) is installed: every agent terminal there, with its workspace and tab.
 
-To put a crashed agent back in its old tab, send its printed line into that pane: `herdr pane run <pane> '<line>'`, or `tmux send-keys -t <pane> '<line>' Enter`. Ask the user which ones first. Some were left open only by accident.
+To put a crashed agent back in its old tab, send its printed line into that pane: `herdr pane run <pane> '<line>'`, or `tmux send-keys -t <pane> '<line>' Enter`. In the herdr app, start a terminal for it instead: `hc run --bg --no-parent --label herdr.space=<space> --label herdr.tab=tb<32 random hex> --name <name> --cwd <dir> <command> --resume <id>`. Copy `<space>` from your own terminal's labels (`hc get $HC_TERMINAL_ID`). The app shows a terminal only when it carries both labels, and an unused tab id opens a new tab. `--no-parent` keeps it from being listed under you and ending when you do. `hc run` starts the program directly, not through a shell, so pass the real command and flags rather than an alias. Quit an agent there with `hc keys <t> ctrl+c ctrl+c`: `hc send` delivers text as a message, so `/exit` would not run. Ask the user which ones first. Some were left open only by accident.
 
-herdr 0.9+ relaunches agents itself after a restart, but only sessions that reported their id through its hook since it was installed. It uses the stock `claude --resume`, so those agents come back in the default permission mode, without the flags of the user's launch command. CRASHED lists the ones herdr did not bring back. If a relaunched agent needs different flags, quit it and resume it with the printed line.
+herdr 0.9+ relaunches agents itself after a restart, but only sessions that reported their id through its hook since it was installed. It uses the stock `claude --resume`, so those agents come back in the default permission mode, without the flags of the user's launch command. CRASHED lists the ones herdr did not bring back. If a relaunched agent needs different flags, quit it and resume it with the printed line. The herdr app never relaunches agents itself (`hc keep` brings back a shell, not the program), so there CRASHED is the whole list.
 
 ## Gotchas
 
@@ -101,7 +101,7 @@ Learned the hard way; each one produced a wrong answer first.
 
 **`--hours` counts from a session's last activity, not from the crash.** Agents idle over a weekend before the machine went down need `--hours 72` or more to show up.
 
-**Codex's app-server daemon rejects permission flags on resume.** A wrapper that routes through it (`codex --remote …`) fails with "Permission overrides are not supported when resuming a remote task". Resume with a plain launch command instead of the one carrying a bypass flag.
+**Codex's app-server daemon rejects permission flags on resume.** A wrapper that routes through it (`codex --remote …`) fails with "Permission overrides are not supported when resuming a remote task". Resume with a plain launch command instead of the one carrying a bypass flag. Inside the herdr app, pass `--no-daemon` too, or Codex runs its commands outside the terminal.
 
 **Codex filenames contain dashes in the timestamp.** `rollout-2026-01-07T10-33-48-<uuid>.jsonl` — never `split("-")` for the id. Anchor a UUID regex at the end of the stem. A truncated id silently fails to match the live process, so a running agent looks dead.
 
