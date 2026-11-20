@@ -334,6 +334,15 @@ def _herdr() -> list[dict]:
         return []
 
 
+def _hc() -> list[dict]:
+    """Agent terminals in the herdr app's core, which `hc ls` prints as JSON when piped."""
+    try:
+        raw = subprocess.run(["hc", "ls"], capture_output=True, text=True, timeout=10).stdout
+        return [t for t in json.loads(raw)["terminals"] if t.get("agent")]
+    except Exception:
+        return []
+
+
 def _count(path: Path, needle: str) -> int:
     """Stream-count occurrences. Deliberately not shelling out to grep."""
     n, tail = 0, ""
@@ -440,6 +449,16 @@ def list_sessions(
             typer.echo(
                 f"  {a['agent']:<7} {a['agent_status']:<8} {a['tab_id']:<22} "
                 f"{a['terminal_title_stripped']}"
+            )
+        typer.echo("")
+
+    terminals = _hc()
+    if terminals:
+        typer.echo("LIVE in the herdr app — reattach there, do NOT resume:\n")
+        for t in terminals:
+            typer.echo(
+                f"  {t['agent']:<12} {t.get('status') or '-':<8} {t['address']:<6} "
+                f"{t.get('where') or t.get('cwd')}"
             )
         typer.echo("")
 
