@@ -86,8 +86,13 @@ rex_mux() {
 # herdr-core (hc): terminal addresses (t11) stand in for pane ids. hc can't rename a terminal, so the
 # worker's name is a label, mux.name=<name>, and every <agent> resolves through it.
 hc_addr() {
-  if [[ $1 =~ ^([a-z0-9_-]+/)?t[0-9]+$ ]]; then echo "$1"
-  else hc ls --json --label "mux.name=$1" | jq -er '.terminals[0].address' || { echo "mux: no terminal named $1" >&2; return 1; }; fi
+  local address
+  if [[ $1 =~ ^([a-z0-9_-]+/)?t[0-9a-z]+$ ]]; then
+    # A label such as "test" also looks like a terminal id. Check the actual address.
+    address=$(hc get "$1" --json 2>/dev/null | jq -r .address)
+    if [[ $address == "$1" || $address == "${1##*/}" ]]; then echo "$1"; return; fi
+  fi
+  hc ls --json --label "mux.name=$1" | jq -er '.terminals[0].address' || { echo "mux: no terminal named $1" >&2; return 1; }
 }
 
 hc_shell() { # <cwd>: a plain shell next to the lead, in the lead's app tab when the lead has one
@@ -97,8 +102,19 @@ hc_shell() { # <cwd>: a plain shell next to the lead, in the lead's app tab when
   hc run --bg --json --cwd "$1" --outlive-parent --no-notify "${labels[@]}" | jq -er .address
 }
 
+hc_settled() { # <terminal> <deadline> <last state>
+  local terminal=$1 deadline=$2 state=$3 remaining
+  # A message to the lead can end hc's wait while the worker is still working.
+  while [[ $state == working ]]; do
+    remaining=$((deadline - SECONDS))
+    ((remaining > 0)) || break
+    state=$(hc wait "$terminal" --timeout "$remaining" --json | jq -er .status) || return
+  done
+  echo "$state"
+}
+
 hc_mux() {
-  local t
+  local t state deadline
   case $1 in
     columns)
       impl=$(hc_shell "$2") || exit
@@ -120,7 +136,10 @@ hc_mux() {
     name-self) hc label "$HC_TERMINAL_ID" "mux.name=$2" "tab.name=$3" >/dev/null ;;
     send) t=$(hc_addr "$2") && hc send "$t" "$3" ;;
     prompt) # a send to a blocked terminal fails without --force: the wanted refusal
-      t=$(hc_addr "$2") && hc send --wait --timeout "${4:-3600}" --json "$t" "$3" | jq -er .wait.status ;;
+      t=$(hc_addr "$2") || exit
+      deadline=$((SECONDS + ${4:-3600}))
+      state=$(hc send --wait --timeout "${4:-3600}" --json "$t" "$3" | jq -er .wait.status) || exit
+      hc_settled "$t" "$deadline" "$state" ;;
     wait)
       t=$(hc_addr "$2") || exit
       if [[ $3 == working ]]; then
@@ -132,7 +151,11 @@ hc_mux() {
           sleep 1
         done
         echo working
-      else hc wait "$t" --timeout "${4:-3600}" --json | jq -er .status; fi ;;
+      else
+        deadline=$((SECONDS + ${4:-3600}))
+        state=$(hc wait "$t" --timeout "${4:-3600}" --json | jq -er .status) || exit
+        hc_settled "$t" "$deadline" "$state"
+      fi ;;
     read) t=$(hc_addr "$2") && hc read "$t" --lines 120 ;;
     close) t=$(hc_addr "$2") && hc kill "$t" ;;
     *) usage ;;

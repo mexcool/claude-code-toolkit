@@ -201,22 +201,24 @@ section{display:flex;flex-direction:column;gap:24px}
 
 <header class="hero">
   <div class="hero-text">
-    <p class="eyebrow">claude-dev-tools · skill</p>
+    <p class="eyebrow">prompts · skill</p>
     <h1>Ticket orchestrator</h1>
-    <p class="lede">One ticket, one worktree, one herdr, Rex or herdr-app tab. A Claude lead passes files between a Claude implementer and its reviewers, sorts what the reviewers find, and comes back to you only for the steps that need a person.</p>
+    <p class="lede">Start in Claude Code or Codex. Your lead uses the same CLI for implementation and the other CLI for primary and blind review. The team shares one ticket and one worktree in the herdr TUI, the herdr app or Rex.</p>
   </div>
   <div class="start">
     <div class="start-label">How a run starts</div>
     <pre class="cmd"><span class="p">$</span> claude --worktree --model fable -n proj-123-lead
 <span class="p">&gt;</span> orchestrate PROJ-123</pre>
-    <p class="note">Needs herdr, Rex or the herdr app. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed. The lead runs on Fable, the implementer on Opus, both reviewers on Sol and the consequences reviewer on Sonnet: the latest release of each, unless you name another model.</p>
+    <pre class="cmd"><span class="p">$</span> codex --no-daemon --worktree
+<span class="p">&gt;</span> orchestrate PROJ-123</pre>
+    <p class="note">Launch in the intended pane. In Codex, select the latest Astra with <code>/model</code> first. An explicit lead choice in your request overrides the starting CLI. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed.</p>
   </div>
 </header>
 
 <section aria-labelledby="walk-h">
   <div class="sec-head">
     <h2 id="walk-h">One run, step by step</h2>
-    <p>Click through a run of PROJ-123. The tab shows which agents are working. The loop folder marks each file as it is written.</p>
+    <p>Click through a Claude-led run of PROJ-123. The tab shows which agents are working. The loop folder marks each file as it is written.</p>
   </div>
   <ol class="track" id="track" aria-label="Steps"></ol>
   <div class="tab-scroll">
@@ -267,17 +269,18 @@ section{display:flex;flex-direction:column;gap:24px}
   </div>
   <div class="table-scroll">
     <table class="cast">
-      <thead><tr><th>Role</th><th>Runs as</th><th>Writes</th><th>Rule it keeps</th></tr></thead>
+      <thead><tr><th>Role</th><th>Claude-led</th><th>Codex-led</th><th>Writes</th><th>Rule it keeps</th></tr></thead>
       <tbody>
-        <tr style="--c:var(--fg)"><td><span class="rdot"></span>You</td><td class="runs">the lead's chat</td><td>yes or no</td><td>Merge, apply, deploy, test pages and product calls wait for you.</td></tr>
-        <tr style="--c:var(--lead)"><td><span class="rdot"></span>Lead</td><td class="runs">Claude · Fable · proj-123-lead</td><td><span class="writes"><code>log.md</code><code>brief-*.md</code><code>lead-*-N.md</code></span></td><td>Relays, sorts and decides. Never implements or reviews.</td></tr>
-        <tr style="--c:var(--impl)"><td><span class="rdot"></span>Implementer</td><td class="runs">Claude · Opus · proj-123-impl</td><td><span class="writes"><code>ticket-kickoff.md</code><code>*-response-N.md</code><code>pr-ready.md</code><code>ops-N.md</code></span></td><td>The only agent that changes the worktree. Makes the smallest change that meets the ticket.</td></tr>
-        <tr style="--c:var(--rev)"><td><span class="rdot"></span>Reviewer</td><td class="runs">Codex · Sol · proj-123-rev</td><td><span class="writes"><code>prep.md</code><code>kickoff-review-N.md</code><code>pr-review-N.md</code></span></td><td>Read-only and posts nothing. Reviews the kickoff, then the PR.</td></tr>
-        <tr style="--c:var(--blind)"><td><span class="rdot"></span>Blind reviewer</td><td class="runs">Codex · Sol · proj-123-blind</td><td><span class="writes"><code>pr-blind-N.md</code></span></td><td>Joins at the PR stage. Its first round sees only the ticket and the PR.</td></tr>
-        <tr style="--c:var(--cq)"><td><span class="rdot"></span>Consequences reviewer</td><td class="runs">Claude · Sonnet · proj-123-cq</td><td><span class="writes"><code>pr-consequences.md</code></span></td><td>Joins at the PR stage for one report, without the plan: who is worse off by each behaviour the PR changes, and for how long. No verdict.</td></tr>
+        <tr style="--c:var(--fg)"><td><span class="rdot"></span>You</td><td class="runs" colspan="2">the lead's chat</td><td>yes or no</td><td>Merge, apply, deploy, test pages and product calls wait for you.</td></tr>
+        <tr style="--c:var(--lead)"><td><span class="rdot"></span>Lead</td><td class="runs">Claude Fable</td><td class="runs">Codex Astra</td><td><span class="writes"><code>log.md</code><code>brief-*.md</code><code>lead-*-N.md</code></span></td><td>Relays, sorts and decides. Never implements or reviews.</td></tr>
+        <tr style="--c:var(--impl)"><td><span class="rdot"></span>Implementer</td><td class="runs">Claude Opus</td><td class="runs">Codex Sol</td><td><span class="writes"><code>ticket-kickoff.md</code><code>*-response-N.md</code><code>pr-ready.md</code><code>ops-N.md</code></span></td><td>The only agent that changes the worktree. Makes the smallest change that meets the ticket.</td></tr>
+        <tr style="--c:var(--rev)"><td><span class="rdot"></span>Reviewer</td><td class="runs">Codex Sol</td><td class="runs">Claude Opus</td><td><span class="writes"><code>prep.md</code><code>kickoff-review-N.md</code><code>pr-review-N.md</code></span></td><td>Read-only and posts nothing. Reviews the kickoff, then the PR.</td></tr>
+        <tr style="--c:var(--blind)"><td><span class="rdot"></span>Blind reviewer</td><td class="runs">Codex Sol</td><td class="runs">Claude Opus</td><td><span class="writes"><code>pr-blind-N.md</code></span></td><td>Joins at the PR stage. Its first round sees only the ticket and the PR.</td></tr>
+        <tr style="--c:var(--cq)"><td><span class="rdot"></span>Consequences reviewer</td><td class="runs" colspan="2">Claude Sonnet</td><td><span class="writes"><code>pr-consequences.md</code></span></td><td>Joins at the PR stage for one report, without the plan: who is worse off by each behaviour the PR changes, and for how long. No verdict.</td></tr>
       </tbody>
     </table>
   </div>
+  <p>For several tickets, ask Astra to <em>meta-orchestrate PROJ-123 and PROJ-456</em>. It starts one Astra lead per ticket in its own worktree. Each lead uses the latest Sol to implement and the Claude reviewers above. The parent collects their reports and brings decisions back to you.</p>
 </section>
 
 <section aria-labelledby="round-h">
@@ -342,12 +345,12 @@ section{display:flex;flex-direction:column;gap:24px}
   <div class="rules">
     <div class="rule"><h3>Every handoff is a file</h3><p>Each message from the lead names the file to write. The worker also prints it word for word in its chat, so you can read along in the apps, or catch up later from <code>log.md</code>.</p></div>
     <div class="rule"><h3>Workers talk only to the lead</h3><p>No worker messages another. Every finding goes through the lead's sort before it reaches the implementer, which is what keeps scope from growing each round.</p></div>
-    <div class="rule"><h3>The multiplexer wakes the lead</h3><p>The lead sends with <code>mux.sh prompt &lt;worker&gt; "…"</code> in the background and ends its turn. The call returns when the worker's turn ends: herdr reads that from the screen, and under Rex and the herdr app the agent reports it. The lead then looks for the file, since the state can be wrong. No file yet means a two-minute grace window, then a look at the pane.</p></div>
+    <div class="rule"><h3>How the lead waits</h3><p><code>mux.sh prompt</code> returns when the worker settles. Claude Code wakes the lead with a background task notification. A Codex lead ends its turn while a shell process waits. When the wait finishes, it saves the result and queues a message that wakes the same Codex thread. The lead then looks for the file, since the state can be wrong. No file yet means a two-minute grace window, then a look at the pane.</p></div>
     <div class="rule"><h3>No dialogs in any pane</h3><p>A pane with an open dialog cannot take a prompt, so the loop would stall until you came back. Workers write their questions into their files instead.</p></div>
   </div>
 </section>
 
-<footer class="foot">Matches the skill as of claude-dev-tools 2.5.0. Source: <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/claude-dev-tools/skills/ticket-orchestrator">plugins/claude-dev-tools/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
+<footer class="foot">Matches the skill in prompts 0.6.1. <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/prompts/skills/ticket-orchestrator">plugins/prompts/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
 
 </div>
 

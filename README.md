@@ -8,19 +8,19 @@ The **Codex** column marks plugins whose skills are agent-agnostic and exported 
 
 | Plugin | Description | Codex |
 |--------|-------------|:-----:|
-| [claude-dev-tools](./plugins/claude-dev-tools) | Plan usage limits, follow-up checks and ticket orchestration | — |
+| [claude-dev-tools](./plugins/claude-dev-tools) | Plan usage limits and follow-up checks | — |
 | [agent-sessions](./plugins/agent-sessions) | Find and resume Claude Code / Codex sessions after a terminal dies | ✓ |
 | [cli-dev](./plugins/cli-dev) | Skills for designing and reviewing agent-friendly CLI tools | ✓ |
 | [gist](./plugins/gist) | GitHub Gists as a lightweight pastebin via the `gh` CLI | ✓ |
 | [obsidian-helper](./plugins/obsidian-helper) | Session notes and task tracking in Obsidian | — |
 | [pastila](./plugins/pastila) | Encrypted pastebin sharing via [pastila.nl](https://pastila.nl/) (ClickHouse) | — |
-| [prompts](./plugins/prompts) | Reusable starter prompts — `pr-review`, `ticket-kickoff`, `kickoff-review`, `altitude`, `deeper`, `range` | ✓ |
+| [prompts](./plugins/prompts) | Ticket orchestration and reusable starter prompts — `ticket-orchestrator`, `pr-review`, `ticket-kickoff`, `kickoff-review`, `altitude`, `deeper`, `range` | ✓ |
 | [reference-docs](./plugins/reference-docs) | Reference books/docs as on-demand skills — `inference-engineering` ([Baseten's Inference Engineering book](https://www.baseten.co/inference-engineering/)) | ✓ |
 | [ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior-dev mode — YAGNI, stdlib first, no unrequested abstractions (third-party, referenced) | — |
 
 `claude-dev-tools` is Claude-specific (usage endpoint, Claude Code sessions, routines and background tasks); `obsidian-helper` / `pastila` ship slash-commands, not skills — so neither is exported to Codex.
 
-To see how a `ticket-orchestrator` run works, step through [the explainer](https://mexcool.github.io/claude-code-toolkit/ticket-orchestrator.html). For prompts that ask a model for more without growing the change, see [Be More Ambitious](https://mexcool.github.io/claude-code-toolkit/be-more-ambitious.html).
+The ticket orchestrator moved from `claude-dev-tools` to `prompts`. In Claude Code, install or update `prompts@claude-code-toolkit` and use `/prompts:ticket-orchestrator PROJ-123`. For Codex, run the installer below. In the herdr TUI, herdr app or Rex, start `codex --no-daemon --worktree`, choose the latest Astra with `/model`, and ask it to orchestrate the ticket. Astra leads, the latest Sol implements, and Claude handles reviews. To supervise several tickets from one Astra chat, ask it to “meta-orchestrate PROJ-123 and PROJ-456.” Each ticket gets its own Astra lead and worker team. [Walk through a run](https://mexcool.github.io/claude-code-toolkit/ticket-orchestrator.html). For prompts that ask a model for more without growing the change, see [Be More Ambitious](https://mexcool.github.io/claude-code-toolkit/be-more-ambitious.html).
 
 ## Installation
 
@@ -38,13 +38,13 @@ Or use the interactive `/plugin` command to browse and install.
 
 ### Codex
 
-Codex has no marketplace; it reads skills from `$CODEX_HOME/skills` (default `~/.codex/skills`). Clone this repo and symlink the agent-agnostic skills into place:
+Clone this repo and run the installer to link its skills into `$CODEX_HOME/skills` (default `~/.codex/skills`).
 
 ```bash
 ./install-codex.sh   # idempotent; re-run after pulling new skills
 ```
 
-This links `agent-sessions`, `altitude`, `axi`, `cursor-cli-dev`, `deeper`, `gist`, `inference-engineering`, `kickoff-review`, `pr-review`, `range`, and `ticket-kickoff` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
+This links `agent-sessions`, `altitude`, `axi`, `cursor-cli-dev`, `deeper`, `gist`, `inference-engineering`, `kickoff-review`, `pr-review`, `range`, `ticket-kickoff`, and `ticket-orchestrator` into `$CODEX_HOME/skills` (pointing back at this repo — no copies). Restart Codex to pick them up.
 
 ## Adding a Skill to an Existing Plugin
 

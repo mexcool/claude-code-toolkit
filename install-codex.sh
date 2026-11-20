@@ -2,7 +2,7 @@
 # Install this toolkit's agent-agnostic skills into Codex.
 #
 # Claude consumes this repo as a plugin marketplace (`/plugin marketplace add …`).
-# Codex has no marketplace, but reads skills from $CODEX_HOME/skills — so this
+# Codex reads local skills from $CODEX_HOME/skills, so this
 # script symlinks the agent-agnostic skills there. The skills stay where they
 # live (plugins/<plugin>/skills/<skill>/); Codex just gets symlinks. One source,
 # no copies, idempotent, safe to re-run.

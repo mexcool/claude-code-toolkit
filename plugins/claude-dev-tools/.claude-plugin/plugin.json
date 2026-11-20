@@ -1,7 +1,7 @@
 {
   "name": "claude-dev-tools",
-  "version": "2.5.0",
-  "description": "Plan usage limits, follow-up checks and ticket orchestration for Claude Code",
+  "version": "3.0.0",
+  "description": "Plan usage limits and follow-up checks for Claude Code",
   "author": {
     "name": "mexcool"
   },
@@ -9,7 +9,6 @@
   "keywords": [
     "claude-code",
     "usage-limits",
-    "workflow",
-    "orchestration"
+    "workflow"
   ]
 }

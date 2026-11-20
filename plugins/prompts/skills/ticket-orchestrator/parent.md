@@ -1,8 +1,8 @@
 # Parent: a session that runs several loops
 
-Read this only if you start several `ticket-orchestrator` leads and stand between them and the user. The lead's side is "When a parent started you" in [SKILL.md](SKILL.md).
+For a single ticket with an explicit choice of the other CLI, use only [Starting a lead](#starting-a-lead). For several tickets, follow the parent workflow below. The lead's side is "When a parent started you" in [SKILL.md](SKILL.md).
 
-**Role.** You do not lead a ticket. You triage, write tickets and briefs, start leads on the user's word, watch their reports, relay decisions, read each change yourself before a merge question, and keep the parent ticket current.
+**Role.** You are the meta-orchestrator. For a Codex parent, resolve Astra as in [Model selection](SKILL.md#model-selection). Start it in the intended pane with `codex --no-daemon -m <resolved-astra>`, or select that Astra in an existing chat. You triage, write tickets and briefs, start leads on the user's word, watch their reports, relay decisions, read each change yourself before a merge question, and keep the parent ticket current.
 
 ## Setup
 
@@ -15,7 +15,7 @@ One folder for the group, `~/ticket-orchestrator/<PARENT>-meta/`:
 
 ## Before a start
 
-- Check the usage limits (`claude-limits`). Measure what the first loop uses in an hour before you start more. Do not start into paid overage without the user's word.
+- Check usage as in the skill’s Setup step 2. Measure what the first loop uses in an hour before you start more. Do not start into paid overage without the user's word.
 - Check that the ticket is true today: read the code it names on a fresh `origin/main`. Write the corrections as a comment on the ticket and in the brief.
 
 ## The brief
@@ -27,19 +27,23 @@ One file for each lead; it is the lead's only context, so state what you already
 3. Facts the ticket does not have.
 4. Rules: one change; what must not change; the proof and the run budget; overlaps with other open PRs and running loops, by file.
 5. PR text rules.
-6. The report channel: the inbox file, or `hc send <parent>` under the herdr app.
+6. The report channel. For a Codex parent, have every lead append to the shared inbox. Under the herdr app, a Claude parent can also receive `hc send <parent>`.
 
 ## Starting a lead
 
-The lead needs its own worktree (`claude --worktree`). Start it with a name, then send `/ticket-orchestrator PROJ-123. Brief from the parent: <path>` (the slash command may carry a plugin prefix).
+Each ticket lead defaults to the parent's CLI. Honor a lead override for that ticket. Launch it in its own clean worktree. Give a Claude lead `--worktree --model fable -n <t>-lead` and a Codex lead `--no-daemon --worktree -m <resolved-astra>`. Apply the user's model choice if specified. Use the launch commands from Setup. Pass the ticket and constraints in plain text, e.g. `Use the ticket-orchestrator skill on PROJ-123`. For a supervised run, append `You are the ticket lead. Brief from the parent: <absolute path>`. Include any role overrides in that brief. The child runs the ordinary single-ticket lineup and starts its own workers. For a single handoff to the other CLI, direct the user to the new lead's tab.
 
 | Multiplexer | Start |
 |---|---|
-| herdr | `herdr tab create --cwd <repo> --label <t>-lead`; in its pane, run the launch command with `herdr pane run`; wait until `herdr agent get` shows the agent ready; `herdr agent rename`; then `herdr agent prompt <t>-lead "<command>"`. |
-| Rex | A new session that runs the launch command (the Rex guide has the flags); then `rex send` the slash command and `rex send-key enter`. |
-| herdr app | `hc run --bg --outlive-parent --name <t>-lead --cwd <repo> claude --dangerously-skip-permissions --worktree -n <t>-lead "/ticket-orchestrator PROJ-123. Brief from the parent: <path>"` |
+| herdr TUI | Create a tab with `herdr tab create --cwd <repo> --label <t>-lead`. In its pane run the chosen CLI with `mux.sh start <pane> <t>-lead <cli> "<launch command>"`, then send the request. |
+| Rex | Start a new session with `rex new <t>-lead --cwd <repo> --shell none -- <executable> <args...>`. Pass the request as a single prompt argument. |
+| herdr app | Run `hc run --bg --outlive-parent --name <t>-lead --cwd <repo> -- <executable> <args...> "<request>"`. |
 
-`hc run` does not expand shell aliases, so spell out the flags. `--outlive-parent` keeps the lead when your program ends. `scripts/mux.sh` already has `start`, `prompt`, `wait` and `read` for the three: reuse them for the lead's pane instead of copying their calls.
+For the Rex and herdr-app examples, supply an executable and its arguments. If the user's launcher is an interactive alias, start it through the shell that defines it. Pass the request as a literal argument so shell expansion preserves the text.
+
+## Waiting for leads
+
+A Codex parent arms one `scripts/inbox-watch.sh <inbox>` at a time using the [Codex wait procedure](SKILL.md#protocol). End the turn. On wake, process the reported lines and arm the next watch while tickets remain. Leads can report while the parent is handling another ticket. The saved inbox position carries those lines into the next wake.
 
 ## Answers
 
@@ -82,7 +86,7 @@ Use the existing tool when it fits. Use a script (in `scripts/`; each prints its
 
 | Script | Does | Exists already |
 |---|---|---|
-| `inbox-watch.sh <file> [state-file]` | Blocks until the file has new lines, prints them, and stores its position in a state file (default `<file>.seen`), so the caller passes no line count. | Under the herdr app a child reports with `hc send` and the parent waits with `hc wait --children`; use that when each lead is a child. The file is the durable record in each case. |
+| `inbox-watch.sh <file> [state-file]` | Blocks until the file has new lines, prints them, and stores its position in a state file (default `<file>.seen`), so the caller passes no line count. | Under the herdr app a child can report to a Claude parent with `hc send` and the parent waits with `hc wait --children`; use that when each lead is a child. The file is the durable record in each case. |
 | `wait-until.sh <HH:MM>` | Waits until that UTC time. | A scheduler or a wakeup tool of the harness, when there is one. |
 | `wait-runs.sh <owner/repo> <run-id>...` | Waits until each CI run is complete and prints status and conclusion. | `gh run watch <id>` for one run. |
 | `wait-scheduled-run.sh <owner/repo> <workflow> <after-iso-time>` | Waits for the next scheduled run of a workflow that was created after the time, and prints its id and conclusion. | Nothing equal in `gh`. |
@@ -93,7 +97,7 @@ Use the existing tool when it fits. Use a script (in `scripts/`; each prints its
 Each one happened.
 
 - An inbox watch restarted with a wrong line count nearly missed a line. Use a watch that keeps its own position (`inbox-watch.sh`).
-- A background command started with `&`, or with its output discarded, loses its result. Use the harness's background mode and read its output file.
+- A background command started with `&`, or with its output discarded, loses its result. Use the lead's wait procedure in [Protocol](SKILL.md#protocol) for each inbox or child wait.
 - Moving the session to another terminal stops its background tasks. Write a resume note in the log first: what to start again, with which arguments.
 - The input box of an idle agent pane can show a suggested prompt, and a bare Enter submits it. Type the text, read the pane, then send Enter.
 - Leads write times from memory. Trust the times of the tracker and of the code host.

@@ -11,7 +11,7 @@ Three-agent loop. Lead `<t>-lead` relays and decides. Implementer `<t>-impl`. Re
 Loop folder: `<dir>`
 
 ## How we talk
-- Every handoff is a file in the loop folder, with the name the lead gives you. **Print the full file in the chat, word for word,** then end your turn. herdr tells the lead when your turn ends; do not message anyone.
+- Every handoff is a file in the loop folder, with the name the lead gives you. **Print the full file in the chat, word for word,** then end your turn. the multiplexer tells the lead when your turn ends; do not message anyone.
 - Do not poll or wait. The lead's next message wakes you.
 - Never open a dialog (AskUserQuestion, plan mode). A pane with a dialog cannot receive messages. Put questions in your file under `## Questions for the lead`.
 - Messages from the lead start with `[<t>-lead]`.
