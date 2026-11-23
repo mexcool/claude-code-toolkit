@@ -21,7 +21,9 @@ description: "Orchestrate a ticket from kickoff through PR review in the herdr T
 
 ## Model selection
 
-An open lead or parent keeps its current model unless the user asks to change it in that chat. If that model is not the table's default for the role, say so once and go on. The table gives defaults for new sessions. For a new Codex parent or ticket lead, run `<skill-dir>/scripts/latest-codex-model.sh astra`. For a Codex implementer or either Codex reviewer, run the same script with `sol`. It prints the newest listed release of that family. Pass the resulting slug with `-m` when starting the session. If lookup fails, resolve the catalog error or get the user's choice before launching that role. Claude's `fable`, `opus` and `sonnet` aliases track the latest releases. An explicit role-specific model takes precedence.
+An open lead or parent keeps its current model unless the user asks to change it in that chat. If that model is not the table's default for the role, say so once and go on. For new sessions, honor a model set by the launch command unless the user picks another. Resolve Codex defaults with `<skill-dir>/scripts/latest-codex-model.sh astra` for parents and leads or `sol` for workers. If lookup fails, resolve the catalog error or get the user's choice before launching. Claude's `fable`, `opus` and `sonnet` aliases track the latest releases. Use one model flag (`-m` in Codex).
+
+For every new Codex parent, lead or worker, type the literal launch command in `ORCH_CODEX_CMD` into the intended pane's interactive shell so aliases expand. If unset, use stock `codex`, with `--dangerously-bypass-approvals-and-sandbox` for workers.
 
 **herdr, Rex or the herdr app.** Make every pane and agent call through `mux.sh` (`<skill-dir>/scripts/mux.sh`; run it with no arguments for its commands). It uses herdr when `HERDR_ENV=1`, else Rex when `REX_SESSION` is set, else the herdr app (herdr-core, `hc`) when `HC_TERMINAL_ID` is set, so this skill reads the same under all three. One difference: herdr reads an agent's state from its screen, while under Rex and the herdr app the agent reports its own state. The app has no panes of its own, so a worker is a terminal named by a `mux.name` label. `name-self` names your tab with a `tab.name` label, which the app's `tab-names` mod ([herdr-extensions](https://github.com/mexcool/herdr-extensions/tree/main/tab-names)) turns into the tab's name. Without that mod the tab shows your session title until you exit, and keeps its number as its name.
 
@@ -30,7 +32,10 @@ An open lead or parent keeps its current model unless the user asks to change it
 0. **Use a clean, dedicated worktree.** In the lead's worktree, `git rev-parse --git-dir` must differ from `git rev-parse --git-common-dir`, and `git status` must be clean. The lead needs access to the mux socket and write access to `~/ticket-orchestrator/`. For a new workspace-write Codex session, create that directory and include `--add-dir ~/ticket-orchestrator` at launch.
 1. For a Codex lead, set the thread title to `<t>-lead` with the title tool when available, or use `/rename <t>-lead` in the idle CLI. Run `mux.sh name-self <t>-lead <t>` to name the pane and tab. If it fails, recover the mux context for this same lead before claiming the ticket.
 
-   **Codex in the herdr app.** The app-server daemon can leave `HC_TERMINAL_ID` unset even when the chat is visible in the app. Use `hc ls --json` to list live terminal addresses and `hc get <address> --json` to check their titles and labels. Match the lead thread title and worktree shown in the terminal title. The terminal's `cwd` can still be the directory where Codex started. Use the unique match with `herdr.space` and `herdr.tab` as `HC_TERMINAL_ID` for every `mux.sh` call. The wrapper copies those labels to put workers in the lead's tab. If you cannot verify a unique match, ask the user for the terminal address.
+   **Codex on a shared app server.** Recover missing pane context for each `mux.sh` call. Ask the user for the pane address and its session if you cannot verify a unique match.
+   - **herdr app.** Use `hc ls --json` and `hc get <address> --json` to match the thread title and worktree in the terminal title. Set `HC_TERMINAL_ID` to the match with `herdr.space` and `herdr.tab` labels so workers open in that tab.
+   - **herdr TUI.** Match the thread title and worktree in `herdr pane list`. Set `HERDR_ENV=1`, `HERDR_PANE_ID` and `HERDR_TAB_ID` from the match. Set `HERDR_SESSION` too if the pane is in a named session.
+   - **Rex.** Use `rex ls --json`, `rex block ls -s <session> --json` and `rex block call -s <session> -b <block> process` to match the lead's pane label or a unique Codex foreground process in the lead's worktree. Set `REX_SESSION` and `REX_BLOCK` to the verified IDs.
 2. Check Claude usage with `claude-limits` when installed. In a symlinked toolkit checkout, either lead can run `uv run <toolkit>/plugins/claude-dev-tools/skills/claude-limits/scripts/claude-limits.py`. If usage is unavailable, ask for the user's budget decision before starting paid work. Do not start into paid overage without their word.
 3. Make `~/ticket-orchestrator/<TICKET>/` and start `log.md` with one line per event, time from `date -u`.
 4. **Claim the ticket.** Assign it to the user and set it In Progress, unless it already is. Log it.
@@ -44,7 +49,7 @@ An open lead or parent keeps its current model unless the user asks to change it
    mux.sh send <name> "/rename <name>"
    ```
 
-   `start` types into the pane's interactive shell, waits for the agent to be ready and names the pane and agent. Use the literal value of `ORCH_CLAUDE_CMD` or `ORCH_CODEX_CMD` when set (aliases are expanded by that shell). The stock commands are `claude --dangerously-skip-permissions` and `codex --dangerously-bypass-approvals-and-sandbox`. Use one model flag per worker. Honor a model already set by the launch command unless the user requests a different one.
+   `start` types into the pane's interactive shell, waits for the agent to be ready and names the pane and agent. For Claude workers, use the launch command in `ORCH_CLAUDE_CMD` or stock `claude --dangerously-skip-permissions`.
 
 6. Write `brief-impl.md` and `brief-rev.md` from [briefs.md](briefs.md), with literal paths and names. Send each one line, as in Protocol: the implementer starts the kickoff. The reviewer starts **prep**: it reads the ticket and the code before it sees the plan, so it has its own view, and writes `prep.md`.
 
@@ -110,7 +115,7 @@ Finish or cancel the outstanding waits before closing worker panes (`mux.sh clos
 ## Gotchas
 
 - **An isolated Claude lead** (started with `--worktree`) cannot run some Bash calls. Its harness refuses a call that puts a runtime value (`$VAR`, `$(…)`) next to `herdr` or `git`, or that pipes into an interpreter. Use literal ids, one plain command per call, and put scripts in files. It also refuses git in another repo's checkout, so the implementer runs those steps.
-- **Codex started through its app-server daemon** runs shell commands in the daemon's environment, so pane `--env` variables are missing. Briefs must carry literal paths and names.
+- **Codex on an app server** runs shell commands in the server's environment. Set launch overrides there and pass literal paths and names in briefs. Recover the pane context at setup.
 - **`herdr pane move`** stops every open wait on that agent (`agent_not_running`). Start the waits again after a move.
 - **Do not wait for an agent with a screen regex.** `herdr pane wait-output` also matches text already on the screen, and a shell prompt can use the same glyph as the agent (`❯`). `mux.sh start` waits on the agent state.
 - **A slash command** sent to a busy Claude pane arrives as plain text. Send `/rename` only when the pane is idle. A Claude lead that needs to rename itself can run this in the background: `mux.sh wait <t>-lead settled && mux.sh send <t>-lead "/rename <t>-lead"`.

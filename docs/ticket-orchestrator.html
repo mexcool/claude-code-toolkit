@@ -209,9 +209,10 @@ section{display:flex;flex-direction:column;gap:24px}
     <div class="start-label">How a run starts</div>
     <pre class="cmd"><span class="p">$</span> claude --worktree --model fable -n proj-123-lead
 <span class="p">&gt;</span> orchestrate PROJ-123</pre>
-    <pre class="cmd"><span class="p">$</span> codex --no-daemon --worktree
+    <pre class="cmd"><span class="p">$</span> git worktree add ../proj-123 &amp;&amp; cd ../proj-123
+<span class="p">$</span> codex
 <span class="p">&gt;</span> orchestrate PROJ-123</pre>
-    <p class="note">For one ticket, your current chat leads with its current model. These commands start a new session in the intended pane. For a new Codex lead, select Astra with <code>/model</code>. In the herdr app, workers open in the lead’s tab. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed.</p>
+    <p class="note">For one ticket, your current chat leads with its current model. For a new Codex lead, select Astra with <code>/model</code>. All new Codex parents, leads and workers use the launch command in <code>ORCH_CODEX_CMD</code> when set. Claude leads and workers use <code>ORCH_CLAUDE_CMD</code> when set. In the herdr app, workers open in the lead’s tab.</p>
   </div>
 </header>
 
@@ -350,7 +351,7 @@ section{display:flex;flex-direction:column;gap:24px}
   </div>
 </section>
 
-<footer class="foot">Matches the skill in prompts 0.7.1. <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/prompts/skills/ticket-orchestrator">plugins/prompts/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
+<footer class="foot">Matches the skill in prompts 0.7.2. <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/prompts/skills/ticket-orchestrator">plugins/prompts/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
 
 </div>
 

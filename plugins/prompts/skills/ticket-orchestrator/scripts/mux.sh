@@ -134,7 +134,8 @@ hc_mux() {
     # hc can't rename an app tab, and herdr-app runs only on the machine with the window. The
     # tab-names mod in that window renames the tab from the tab.name label (herdr-extensions).
     name-self) hc label "$HC_TERMINAL_ID" "mux.name=$2" "tab.name=$3" >/dev/null ;;
-    send) t=$(hc_addr "$2") && hc send "$t" "$3" ;;
+    # With a sender terminal, hc prefixes the text, so /rename becomes a prompt.
+    send) t=$(hc_addr "$2") && env -u HC_TERMINAL_ID hc send "$t" "$3" ;;
     prompt) # a send to a blocked terminal fails without --force: the wanted refusal
       t=$(hc_addr "$2") || exit
       deadline=$((SECONDS + ${4:-3600}))

@@ -2,9 +2,11 @@
 
 For an explicit handoff of a single ticket to a separate lead, use only [Starting a lead](#starting-a-lead). To supervise separate leads for several tickets, follow the parent workflow below. The lead's side is "When a parent started you" in [SKILL.md](SKILL.md).
 
-**Role.** You are the meta-orchestrator. Use the current model in an open parent chat. For a new Codex parent, resolve Astra as in [Model selection](SKILL.md#model-selection) and start it in the intended pane with `codex --no-daemon -m <resolved-astra>`. You triage, write tickets and briefs, start leads on the user's word, watch their reports, relay decisions, read each change yourself before a merge question, and keep the parent ticket current.
+**Role.** You are the meta-orchestrator. Use the current model in an open parent chat. Start a new Codex parent in the intended pane with the launch command in `ORCH_CODEX_CMD` and the model from [Model selection](SKILL.md#model-selection). You triage, write tickets and briefs, start leads on the user's word, watch their reports, relay decisions, read each change yourself before a merge question, and keep the parent ticket current.
 
 ## Setup
+
+If the parent's pane context is missing, recover it using the parent's thread title and the checks in [Setup](SKILL.md#setup).
 
 One folder for the group, `~/ticket-orchestrator/<PARENT>-meta/`:
 
@@ -31,15 +33,15 @@ One file for each lead; it is the lead's only context, so state what you already
 
 ## Starting a lead
 
-Each ticket lead defaults to the parent's CLI. Honor a lead override for that ticket. Launch it in its own clean worktree. Give a Claude lead `--worktree --model fable -n <t>-lead` and a Codex lead `--no-daemon --worktree -m <resolved-astra>`. Apply the user's model choice if specified. Pass the ticket and constraints in plain text, e.g. `Use the ticket-orchestrator skill on PROJ-123`. For a supervised run, append `You are the ticket lead. Brief from the parent: <absolute path>`. Include any role overrides in that brief. The child runs the ordinary single-ticket lineup and starts its own workers. For a single-ticket handoff, direct the user to the new lead's tab.
+Each lead defaults to the parent's CLI. Honor the user's CLI and model choices. Start a Claude lead from the repo with the launch command in `ORCH_CLAUDE_CMD` when set or `claude` otherwise. Add `--worktree --model fable -n <t>-lead`. For a Codex lead, create a clean `git worktree` before launch and start from that directory with the launch command in `ORCH_CODEX_CMD` and the model from [Model selection](SKILL.md#model-selection). Codex's `--worktree` flag requires a local session.
 
 | Multiplexer | Start |
 |---|---|
-| herdr TUI | Create a tab with `herdr tab create --cwd <repo> --label <t>-lead`. In its pane run the chosen CLI with `mux.sh start <pane> <t>-lead <cli> "<launch command>"`, then send the request. |
-| Rex | Start a new session with `rex new <t>-lead --cwd <repo> --shell none -- <executable> <args...>`. Pass the request as a single prompt argument. |
-| herdr app | Run `hc run --bg --outlive-parent --name <t>-lead --cwd <repo> -- <executable> <args...> "<request>"`. |
+| herdr TUI | Create a tab with `herdr tab create --cwd <launch-dir> --label <t>-lead` and use its root pane. |
+| Rex | Start a shell with `rex new <t>-lead --cwd <launch-dir> --json`. Use the returned block and set `REX_SESSION` to the new session for calls targeting the lead. |
+| herdr app | Start a shell with `hc run --bg --outlive-parent --name <t>-lead --cwd <launch-dir> --json` and use its address. |
 
-For the Rex and herdr-app examples, supply an executable and its arguments. If the user's launcher is an interactive alias, start it through the shell that defines it. Pass the request as a literal argument so shell expansion preserves the text.
+Run `mux.sh start <pane> <t>-lead <cli> "<launch command>"` and send the request once the lead is ready. Pass the ticket and constraints in plain text, for example `Use the ticket-orchestrator skill on PROJ-123`. For a supervised run, append `You are the ticket lead. Brief from the parent: <absolute path>` and put role overrides in that brief. The child starts its own workers. For a single-ticket handoff, direct the user to the new lead's tab.
 
 ## Waiting for leads
 
