@@ -1,8 +1,8 @@
 # Parent: a session that runs several loops
 
-For a single ticket with an explicit choice of the other CLI, use only [Starting a lead](#starting-a-lead). For several tickets, follow the parent workflow below. The lead's side is "When a parent started you" in [SKILL.md](SKILL.md).
+For an explicit handoff of a single ticket to a separate lead, use only [Starting a lead](#starting-a-lead). To supervise separate leads for several tickets, follow the parent workflow below. The lead's side is "When a parent started you" in [SKILL.md](SKILL.md).
 
-**Role.** You are the meta-orchestrator. For a Codex parent, resolve Astra as in [Model selection](SKILL.md#model-selection). Start it in the intended pane with `codex --no-daemon -m <resolved-astra>`, or select that Astra in an existing chat. You triage, write tickets and briefs, start leads on the user's word, watch their reports, relay decisions, read each change yourself before a merge question, and keep the parent ticket current.
+**Role.** You are the meta-orchestrator. Use the current model in an open parent chat. For a new Codex parent, resolve Astra as in [Model selection](SKILL.md#model-selection) and start it in the intended pane with `codex --no-daemon -m <resolved-astra>`. You triage, write tickets and briefs, start leads on the user's word, watch their reports, relay decisions, read each change yourself before a merge question, and keep the parent ticket current.
 
 ## Setup
 
@@ -31,7 +31,7 @@ One file for each lead; it is the lead's only context, so state what you already
 
 ## Starting a lead
 
-Each ticket lead defaults to the parent's CLI. Honor a lead override for that ticket. Launch it in its own clean worktree. Give a Claude lead `--worktree --model fable -n <t>-lead` and a Codex lead `--no-daemon --worktree -m <resolved-astra>`. Apply the user's model choice if specified. Use the launch commands from Setup. Pass the ticket and constraints in plain text, e.g. `Use the ticket-orchestrator skill on PROJ-123`. For a supervised run, append `You are the ticket lead. Brief from the parent: <absolute path>`. Include any role overrides in that brief. The child runs the ordinary single-ticket lineup and starts its own workers. For a single handoff to the other CLI, direct the user to the new lead's tab.
+Each ticket lead defaults to the parent's CLI. Honor a lead override for that ticket. Launch it in its own clean worktree. Give a Claude lead `--worktree --model fable -n <t>-lead` and a Codex lead `--no-daemon --worktree -m <resolved-astra>`. Apply the user's model choice if specified. Pass the ticket and constraints in plain text, e.g. `Use the ticket-orchestrator skill on PROJ-123`. For a supervised run, append `You are the ticket lead. Brief from the parent: <absolute path>`. Include any role overrides in that brief. The child runs the ordinary single-ticket lineup and starts its own workers. For a single-ticket handoff, direct the user to the new lead's tab.
 
 | Multiplexer | Start |
 |---|---|

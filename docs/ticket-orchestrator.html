@@ -211,7 +211,7 @@ section{display:flex;flex-direction:column;gap:24px}
 <span class="p">&gt;</span> orchestrate PROJ-123</pre>
     <pre class="cmd"><span class="p">$</span> codex --no-daemon --worktree
 <span class="p">&gt;</span> orchestrate PROJ-123</pre>
-    <p class="note">Launch in the intended pane. In Codex, select the latest Astra with <code>/model</code> first. An explicit lead choice in your request overrides the starting CLI. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed.</p>
+    <p class="note">For one ticket, your current chat leads with its current model. These commands start a new session in the intended pane. For a new Codex lead, select Astra with <code>/model</code>. In the herdr app, workers open in the lead’s tab. Workers launch with <code>ORCH_CLAUDE_CMD</code> and <code>ORCH_CODEX_CMD</code>, or with stock <code>claude</code> and <code>codex</code> with permissions bypassed.</p>
   </div>
 </header>
 
@@ -269,7 +269,7 @@ section{display:flex;flex-direction:column;gap:24px}
   </div>
   <div class="table-scroll">
     <table class="cast">
-      <thead><tr><th>Role</th><th>Claude-led</th><th>Codex-led</th><th>Writes</th><th>Rule it keeps</th></tr></thead>
+      <thead><tr><th>Role</th><th>Claude-led defaults</th><th>Codex-led defaults</th><th>Writes</th><th>Rule it keeps</th></tr></thead>
       <tbody>
         <tr style="--c:var(--fg)"><td><span class="rdot"></span>You</td><td class="runs" colspan="2">the lead's chat</td><td>yes or no</td><td>Merge, apply, deploy, test pages and product calls wait for you.</td></tr>
         <tr style="--c:var(--lead)"><td><span class="rdot"></span>Lead</td><td class="runs">Claude Fable</td><td class="runs">Codex Astra</td><td><span class="writes"><code>log.md</code><code>brief-*.md</code><code>lead-*-N.md</code></span></td><td>Relays, sorts and decides. Never implements or reviews.</td></tr>
@@ -280,7 +280,7 @@ section{display:flex;flex-direction:column;gap:24px}
       </tbody>
     </table>
   </div>
-  <p>For several tickets, ask Astra to <em>meta-orchestrate PROJ-123 and PROJ-456</em>. It starts one Astra lead per ticket in its own worktree. Each lead uses the latest Sol to implement and the reviewers of a Codex-led run above. The parent collects their reports and brings decisions back to you.</p>
+  <p>For several tickets, ask the current Codex chat to <em>meta-orchestrate PROJ-123 and PROJ-456</em>. It starts one lead per ticket in its own worktree, with Astra as the lead default. Each lead uses the latest Sol to implement and the reviewers of a Codex-led run above. The parent collects their reports and brings decisions back to you.</p>
 </section>
 
 <section aria-labelledby="round-h">
@@ -350,7 +350,7 @@ section{display:flex;flex-direction:column;gap:24px}
   </div>
 </section>
 
-<footer class="foot">Matches the skill in prompts 0.7.0. <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/prompts/skills/ticket-orchestrator">plugins/prompts/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
+<footer class="foot">Matches the skill in prompts 0.7.1. <a href="https://github.com/mexcool/claude-code-toolkit/tree/main/plugins/prompts/skills/ticket-orchestrator">plugins/prompts/skills/ticket-orchestrator</a>. PROJ-123 is an example ticket.</footer>
 
 </div>
 

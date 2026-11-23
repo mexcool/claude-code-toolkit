@@ -1,6 +1,6 @@
 {
   "name": "prompts",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Ticket orchestration, kickoff, PR review and reusable prompts for Claude Code and Codex",
   "author": {
     "name": "mexcool"
