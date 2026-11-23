@@ -123,7 +123,7 @@ hc_mux() {
     split-below) hc_shell "$3" ;;
     start)
       app=$4; [[ $app == claude ]] && app=claude-code
-      hc label "$2" "mux.name=$3" >/dev/null || exit
+      hc label "$2" "mux.name=$3" "pane.name=$3" >/dev/null || exit
       hc send "$2" "$5" >/dev/null || exit
       deadline=$((SECONDS + 60))
       until json=$(hc get "$2" --json 2>/dev/null) &&
@@ -131,9 +131,10 @@ hc_mux() {
         ((SECONDS < deadline)) || { echo "mux: no ready $4 agent in $2 after 60s" >&2; exit 1; }
         sleep 1
       done ;;
-    # hc can't rename an app tab, and herdr-app runs only on the machine with the window. The
-    # tab-names mod in that window renames the tab from the tab.name label (herdr-extensions).
-    name-self) hc label "$HC_TERMINAL_ID" "mux.name=$2" "tab.name=$3" >/dev/null ;;
+    # hc can't rename an app tab or pane, and herdr-app runs only on the machine with the window.
+    # The tab-names mod in that window renames the tab from the tab.name label, and each pane from
+    # its pane.name label (herdr-extensions; pane names need Herdr 0.1.17).
+    name-self) hc label "$HC_TERMINAL_ID" "mux.name=$2" "tab.name=$3" "pane.name=$2" >/dev/null ;;
     # With a sender terminal, hc prefixes the text, so /rename becomes a prompt.
     send) t=$(hc_addr "$2") && env -u HC_TERMINAL_ID hc send "$t" "$3" ;;
     prompt) # a send to a blocked terminal fails without --force: the wanted refusal
